@@ -31,13 +31,19 @@ Date.prototype.yyyymmdd = function() {
 function mint_token(pre_token) {
     var counter = 1;
 
-    // begin incrementing counter for valid token
-    //while(true){
+    // slow while loop. because operating on strings? faster with binary?
+    // bitshifting maybe?
+    while(true){
         token = pre_token + counter;
-        hash = CryptoJS.SHA1(token); // take sha1 of token
-        alert(token + '\n' + hash.toString(CryptoJS.enc.Hex));
-        // find first 20 bits of token
-        // if all characters are zeros, break
-        // else increment counter
-    //}
+        hash = CryptoJS.SHA1(token);
+        coll = hash.toString(CryptoJS.enc.Hex).substring(0,5);
+        if(coll.indexOf("00000") > -1) {
+            break;
+        }
+        else {
+            counter += 1;
+        }
+    }
+
+    alert(token + "\n" + hash.toString(CryptoJS.enc.Hex));
 }
