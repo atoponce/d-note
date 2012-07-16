@@ -3,8 +3,8 @@ function validate_token() {
     var randomstring = nonce();
     var d = new Date();
     var yyyymmdd = d.yyyymmdd();
-    // valid hashcash v1.0 token
     var pre_token = '1:20:'+yyyymmdd+':'+resource+'::'+randomstring+':';
+
     mint_token(pre_token);
 }
 
@@ -25,25 +25,21 @@ Date.prototype.yyyymmdd = function() {
     var yyyy = this.getFullYear().toString();
     var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
     var dd  = this.getDate().toString();
+
     return yyyy + (mm[1]?mm:"0"+mm[0]) + (dd[1]?dd:"0"+dd[0]); // padding
 };
 
 function mint_token(pre_token) {
     var counter = 1;
+    var re = /^00000/;
 
-    // slow while loop. because operating on strings? faster with binary?
-    // bitshifting maybe?
     while(true){
-        token = pre_token + counter;
-        hash = CryptoJS.SHA1(token);
-        coll = hash.toString(CryptoJS.enc.Hex).substring(0,5);
-        if(coll.indexOf("00000") > -1) {
-            break;
-        }
-        else {
-            counter += 1;
-        }
+        if(re.test(CryptoJS.SHA1(pre_token+counter))) { break; }
+        counter += 1;
     }
 
-    alert(token + "\n" + hash.toString(CryptoJS.enc.Hex));
+    token = pre_token+counter;
+    hash = CryptoJS.SHA1(pre_token+counter);
+
+    alert(token + "\n" + hash);
 }
