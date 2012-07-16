@@ -3,9 +3,15 @@ function validate_token() {
     var randomstring = nonce();
     var d = new Date();
     var yyyymmdd = d.yyyymmdd();
-    var pre_token = '1:20:'+yyyymmdd+':'+resource+'::'+randomstring+':';
+    var pre_token = '1:12:'+yyyymmdd+':'+resource+'::'+randomstring+':';
 
-    mint_token(pre_token);
+    //var start = new Date();
+    token = mint_token(pre_token);
+    //var end = new Date();
+    //var fin = (end-start)/1000;
+
+    //var perf = token.split(':')[6];
+    //alert(fin+' seconds\n'+perf/fin+' tokens per second');
 }
 
 function nonce() {
@@ -30,16 +36,14 @@ Date.prototype.yyyymmdd = function() {
 };
 
 function mint_token(pre_token) {
-    var counter = 1;
-    var re = /^00000/;
+    var counter = 0;
 
     while(true){
-        if(re.test(CryptoJS.SHA1(pre_token+counter))) { break; }
+        if(CryptoJS.SHA1(pre_token+counter).toString().substring(0,3) === '000') { break; }
         counter += 1;
     }
 
     token = pre_token+counter;
     hash = CryptoJS.SHA1(pre_token+counter);
-
-    alert(token + "\n" + hash);
+    return token;
 }
