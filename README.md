@@ -76,7 +76,7 @@ characters for our URLs are thus:
 
 So, a valid URL for your self destructing notes could be:
 
-    https://exmaple.com/cWQI4m3fRcW8zM_Mdeg3uQ
+    https://example.com/cWQI4m3fRcW8zM_Mdeg3uQ
 
 There are some notes to consider with this URL scheme:
 
