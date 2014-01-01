@@ -60,13 +60,12 @@ URL Generation
 URLs for self destructing notes should not be predictable in any manner.
 Thus, a 22-character base64-encoded string is generated for each
 submission. This will give us enough random URLs to avoid a collision with
-1 in 2^122. The code should be self-documenting, however, this might
+1 in 2^128. The code should be self-documenting, however, this might
 explain things a bit more clearly.
 
-Each URI starts with using data found in /dev/urandom by using the uuid
-module with `u=uuid.uuid4()`. This gives the source of the URI 122-bits of
-entropy, by using the randomness found in the UUID v4 RFC, which should be
-sufficient for generating URLs.
+Each URI is built using a random string of data from the Python Crypto library,
+built from a 128-bit, or 16-byte number. The URL is then base64 encoded, with
+safe URL characters.
 
 We then encode the string using `base64.urlsafe_b64encode(u.bytes)[:22]`
 from the base64 module. This gives us 22 characters for our URL. The valid
@@ -80,14 +79,10 @@ So, a valid URL for your self destructing notes could be:
 
 There are some notes to consider with this URL scheme:
 
-* UUID v4 has the format XXXXXXXX-XXXX-4XXX-MXXX-XXXXXXXXXXXX, where '4' is
-statically defined, and 'M' can be 8 9 a or b.
-* With the raw bytes converted to base64, some characters are predictable.
-Its format is XXXXXXXXMXNXXXXXXXXXXXO, where 'M' is either QRST,
-'N' is either -26aCeGiKmOqSuWy and 'O' is either AgQw.
+Its format is XXXXXXXXXXXXXXXXXXXXXXO, where 'O' is either AgQw.
 
 Regardless, the server would need to be processing 1 billion URLs every
-second for 100 years before we reached the probability of 1/2 for
+second for 1,000 years before we reached the probability of 1/2 for
 generating a duplicate URL.
 
 d-note does not keep track of which URLs have been generated. Thus, it is
