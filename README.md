@@ -26,6 +26,53 @@ something that had a familiar ring to it. "d-note" seemed to fit for
 "destructive note", and as already mentioned, inspired by the hydrogen
 bomb.
 
+Securing The Data
+=================
+
+Server Side
+-----------
+
+All notes are compressed using ZLIB and encrypted using Blowfish in ECB mode
+before being written to disk. Never at any point is the note in plaintext on
+disk.
+
+Blowfish was chosen as the cipher for encrypting the data, as the key can be
+any length, whereas AES requires static key lengths. This could be enforced
+client-side with Javascript, but some clients have Javascript disabled.
+
+ECB mode was chosen over CBC for encrypting the blocks, due to not wanting to
+maintain an initialization vector. Even though ECB can leack information about
+plaintext blocks, the data is compressed with ZLIB before encrypted. This
+increases the entropy of the plaintext, and removes duplicated blocks from the
+plaintext, as is the design of compression algorithms.
+
+Although I cannot enforce this, you should serve the application over SSL. The
+plaintext must be transmitted between the browser and the server, before it can
+be encrypted. The data is also decrypted on the server, and transmitted to the
+recipient's browser. As such, you should protect the data from being sniffed
+using SSL on this application.
+
+When the note is destroyed, it is first overwritten 3 times with random data,
+then removed. There are a couple benefits from this:
+
+* If the underlying filesystem is copy on write, then new random data is
+  written to new sectorns on disk, making it difficult to know precisely where
+  the encrypted file ended and where the random data started.
+* If the underlying filesystem is a journaled filesystem, the journal may have
+  logged entries of the data. But again, because it's encrypted then random, it
+  will be very difficult to know when the encrypted data was stored and when
+  it was overwritten with random data.
+
+Client Side
+-----------
+
+There are many things I could do to greatly discourage the recipient from
+copying the plaintext, but they're mostly just annoying. There's nothing to
+stop the recipient from memoring the note, taking a screenshot (or many), or
+copying and pasting the text. If the recipient really wants the note saved that
+badly, it will happen. As such, the only thing that can be done is destroying
+the note after a given interval, to prevent it from being viewed again.
+
 Python Documentation
 ====================
 
