@@ -1,5 +1,7 @@
 import base64
 import os
+import random
+import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import Blowfish
@@ -12,16 +14,33 @@ dnote = Flask(__name__)
 # strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d 'n'; echo
 key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym"
 
+# untested
 def async(func):
     def wrap(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
     return wrap
 
+# untested
 @async
 def note_destroy()
     while True:
-        # code to identify which files to destroy
+        start_time = time.time()
+        for f in os.listdir('data/'):
+            file_mtime = os.stat(f)[8]
+            if (start_time - file_mtime) > 2592000:
+                secure_remove(f)
+        time.sleep(86400)
+
+def secure_remove(path):
+    random.seed()
+    with open(path, "r+") as f:
+        for char in xrange(os.stat(f.name).st_size):
+            f.seek(char)
+            f.write(chr(random.randrange(256))
+            f.write(chr(random.randrange(256))
+            f.write(chr(random.randrange(256))
+    os.remove(path)
 
 def note_encrypt(key, plaintext, new_url):
     dnote.logger.debug('note_encrypt')
