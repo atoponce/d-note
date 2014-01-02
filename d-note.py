@@ -121,7 +121,11 @@ def show_post(new_url):
 
 @dnote.route('/<random_url>')
 def fetch_url(random_url):
-    """Return the decrypted note. Begin short destruction timer."""
+    """Return the decrypted note. Begin short destruction timer.
+    
+    Keyword arguments:
+    random_url -- Random URL representing the encrypted note
+    """
     plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
