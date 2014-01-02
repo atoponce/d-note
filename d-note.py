@@ -24,7 +24,7 @@ def async(func):
 
 # untested
 @async
-def note_destroy()
+def note_destroy():
     """Destroy unread notes older than 30 days."""
     dnote.logger.debug('note_destroy')
     while True:
