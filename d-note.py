@@ -88,7 +88,7 @@ def note_decrypt(key, ciphertext):
     return zlib.decompress(unpad(plaintext))
 
 def create_url():
-    """Create a new random URI for not retrieval."""
+    """Return a new random 128-bit URI for retrieval."""
     dnote.logger.debug('create_url')
     new_url = base64.urlsafe_b64encode(Random.new().read(16))[:22]
     if os.path.exists('data/%s' % new_url):
@@ -105,7 +105,11 @@ def index():
 
 @dnote.route('/post/<new_url>', methods = ['POST', 'GET'])
 def show_post(new_url):
-    """Return the random URL after posting the plaintext."""
+    """Return the random URL after posting the plaintext.
+    
+    Keyword arguments:
+    new_url -- encrypted file representing the unique URL
+    """
     if request.method == 'POST':
         dnote.logger.debug('handle post request')
         plaintext = request.form['paste']
