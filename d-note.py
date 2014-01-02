@@ -4,7 +4,7 @@ import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import Blowfish
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
 
 dnote = Flask(__name__)
@@ -13,7 +13,6 @@ dnote = Flask(__name__)
 # strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d 'n'; echo
 key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym"
 
-# untested
 def async(func):
     """Return threaded wrapper function."""
     dnote.logger.debug('async decorator')
@@ -22,7 +21,6 @@ def async(func):
         t.start()
     return wrapper
 
-# untested
 @async
 def note_destroy():
     """Destroy unread notes older than 30 days."""
@@ -52,7 +50,7 @@ def secure_remove(path):
             f.write(chr(r.read(1)))
     os.remove(path)
 
-def note_encrypt(key, plaintext, new_url):
+def note_encrypt(key, plaintext, new_url, key_file = False):
     """Encrypt a plaintext to a URI file.
 
     All files are encrypted with Blowfish in ECB mode. Plaintext is
@@ -63,10 +61,14 @@ def note_encrypt(key, plaintext, new_url):
     key -- private key to encrypt the plaintext
     plaintext -- the message to be encrypted
     new_url -- file to save the encrypted text to
+    key_file -- 'True' only if a private key was used for encryption
     """
     dnote.logger.debug('note_encrypt')
     pad = lambda s: s + (8 - len(s) % 8) * chr(8 - len(s) % 8)
     plain = pad(zlib.compress(plaintext))
+    if key_file:
+        # create empty file with '.key' as an extension
+        open('data/%s.key' % new_url, 'a').close()
     with open('data/%s' % new_url, 'w') as f:
         bf = Blowfish.new(key, Blowfish.MODE_ECB)
         ciphertext = bf.encrypt(plain)
@@ -94,7 +96,14 @@ def create_url():
     if os.path.exists('data/%s' % new_url):
         create_url()
     return new_url
-    
+
+@dnote.route('/key', methods = ['POST','GET'])
+def request_key():
+    """Return the page to ask the recipient for the passphrase key."""
+    if request.method == 'POST':
+        key = request.form['pass']
+    return redirect(url_for('fetch_url', key))
+
 @dnote.route('/', methods = ['POST','GET'])
 def index():
     """Return the index.html for the main application."""
@@ -111,10 +120,13 @@ def show_post(new_url):
     new_url -- encrypted file representing the unique URL
     """
     if request.method == 'POST':
+        if request.form['pass']:
+            key = request.form['pass']
+            key_file = True
         dnote.logger.debug('handle post request')
         plaintext = request.form['paste']
         dnote.logger.debug('create cipher file')
-        note_encrypt(key, plaintext, new_url)
+        note_encrypt(key, plaintext, new_url, key_file)
     else:
         error = "Invalid data."
     return render_template('post.html', random = new_url)
@@ -126,6 +138,8 @@ def fetch_url(random_url):
     Keyword arguments:
     random_url -- Random URL representing the encrypted note
     """
+    if os.path('data/%s.key' % random_url):
+        request_key()
     plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
