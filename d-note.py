@@ -1,6 +1,5 @@
 import base64
 import os
-import random
 import time
 import zlib
 from Crypto import Random
@@ -16,14 +15,18 @@ key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym"
 
 # untested
 def async(func):
-    def wrap(*args, **kwargs):
+    """Return threaded wrapper function."""
+    dnote.logger.debug('async decorator')
+    def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
-    return wrap
+    return wrapper
 
 # untested
 @async
 def note_destroy()
+    """Destroy unread notes older than 30 days."""
+    dnote.logger.debug('note_destroy')
     while True:
         start_time = time.time()
         for f in os.listdir('data/'):
@@ -33,16 +36,34 @@ def note_destroy()
         time.sleep(86400)
 
 def secure_remove(path):
-    random.seed()
+    """Securely overwrite any file, then remove the file.
+
+    Do not make any assumptions about the underlying filesystem, whether
+    it's journaled, copy-on-write, or whatever.
+
+    Keyword arguments:
+    path -- an absolute path to the file to overwrite with random data
+    """
+    dnote.logger.debug('secure_remove')
+    r = Random.new()
     with open(path, "r+") as f:
         for char in xrange(os.stat(f.name).st_size):
             f.seek(char)
-            f.write(chr(random.randrange(256))
-            f.write(chr(random.randrange(256))
-            f.write(chr(random.randrange(256))
+            f.write(chr(r.read(1)))
     os.remove(path)
 
 def note_encrypt(key, plaintext, new_url):
+    """Encrypt a plaintext to a URI file.
+
+    All files are encrypted with Blowfish in ECB mode. Plaintext is
+    compressed with ZLIB first before encryption to prevent leaking
+    repeated blocks in the ciphertext. Also saves disk space.
+
+    Keyword arguments:
+    key -- private key to encrypt the plaintext
+    plaintext -- the message to be encrypted
+    new_url -- file to save the encrypted text to
+    """
     dnote.logger.debug('note_encrypt')
     pad = lambda s: s + (8 - len(s) % 8) * chr(8 - len(s) % 8)
     plain = pad(zlib.compress(plaintext))
@@ -51,7 +72,13 @@ def note_encrypt(key, plaintext, new_url):
         ciphertext = bf.encrypt(plain)
         f.write(ciphertext.encode("base64"))
 
-def note_decrypt(ciphertext):
+def note_decrypt(key, ciphertext):
+    """Decrypt a ciphertext from a given URI file.
+
+    Keyword arguments:
+    key -- private key to decrypt the ciphertext
+    ciphertext -- the message to be decrypted
+    """
     dnote.logger.debug('note_decrypt')
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('data/%s' % ciphertext, 'r') as f:
@@ -61,6 +88,7 @@ def note_decrypt(ciphertext):
     return zlib.decompress(unpad(plaintext))
 
 def create_url():
+    """Create a new random URI for not retrieval."""
     dnote.logger.debug('create_url')
     new_url = base64.urlsafe_b64encode(Random.new().read(16))[:22]
     if os.path.exists('data/%s' % new_url):
@@ -69,6 +97,7 @@ def create_url():
     
 @dnote.route('/', methods = ['POST','GET'])
 def index():
+    """Return the index.html for the main application."""
     dnote.logger.debug('default route')
     error = None
     new_url = create_url()
@@ -76,6 +105,7 @@ def index():
 
 @dnote.route('/post/<new_url>', methods = ['POST', 'GET'])
 def show_post(new_url):
+    """Return the random URL after posting the plaintext."""
     if request.method == 'POST':
         dnote.logger.debug('handle post request')
         plaintext = request.form['paste']
@@ -87,7 +117,8 @@ def show_post(new_url):
 
 @dnote.route('/<random_url>')
 def fetch_url(random_url):
-    plaintext = note_decrypt(random_url)
+    """Return the decrypted note. Begin short destruction timer."""
+    plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
 if __name__ == '__main__':
