@@ -138,8 +138,8 @@ def fetch_url(random_url):
     Keyword arguments:
     random_url -- Random URL representing the encrypted note
     """
-    if os.path('data/%s.key' % random_url):
-        return render_template('key.html', key = request.form['pass']
+    if os.path('data/%s.key' % random_url) and request.method != 'POST':
+        return render_template('key.html', random = random_url)
     plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
