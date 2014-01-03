@@ -141,8 +141,10 @@ def fetch_url(random_url):
     if os.path.exists('data/%s.key' % random_url) and request.method != 'POST':
         return render_template('key.html', random = random_url)
     elif os.path.exists('data/%s.key' % random_url) and request.method == 'POST':
-        key = request.form['pass']
-    plaintext = note_decrypt(key, random_url)
+        privkey = request.form['pass']
+        plaintext = note_decrypt(privkey, random_url)
+    else:
+        plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
 if __name__ == '__main__':
