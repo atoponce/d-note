@@ -97,12 +97,12 @@ def create_url():
         create_url()
     return new_url
 
-@dnote.route('/key', methods = ['POST','GET'])
-def request_key():
-    """Return the page to ask the recipient for the passphrase key."""
-    if request.method == 'POST':
-        key = request.form['pass']
-    return redirect(url_for('fetch_url', key))
+#@dnote.route('/key', methods = ['POST','GET'])
+#def request_key():
+#    """Return the page to ask the recipient for the passphrase key."""
+#    if request.method == 'POST':
+#        key = request.form['pass']
+#    return redirect(url_for('fetch_url', key))
 
 @dnote.route('/', methods = ['POST','GET'])
 def index():
@@ -139,7 +139,7 @@ def fetch_url(random_url):
     random_url -- Random URL representing the encrypted note
     """
     if os.path('data/%s.key' % random_url):
-        request_key()
+        return render_template('key.html', key = request.form['pass']
     plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
