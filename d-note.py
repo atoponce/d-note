@@ -131,15 +131,17 @@ def show_post(new_url):
         error = "Invalid data."
     return render_template('post.html', random = new_url)
 
-@dnote.route('/<random_url>')
+@dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
     """Return the decrypted note. Begin short destruction timer.
     
     Keyword arguments:
     random_url -- Random URL representing the encrypted note
     """
-    if os.path('data/%s.key' % random_url) and request.method != 'POST':
+    if os.path.exists('data/%s.key' % random_url) and request.method != 'POST':
         return render_template('key.html', random = random_url)
+    elif os.path.exists('data/%s.key' % random_url) and request.method == 'POST':
+        key = request.form['pass']
     plaintext = note_decrypt(key, random_url)
     return render_template('note.html', text = plaintext)
 
