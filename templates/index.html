@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Self Destructing Notes</title>
+    <script src="static/js/main.js"></script>
   </head>
   <body>
     <form method="POST" action="post/{{ random }}">
@@ -9,9 +10,10 @@
       <br/>
       <textarea style="width:100%; height:250px" name="paste"></textarea>
       <br/>
-      Passphrase (optional): <input type="text" name="pass">
+      Passphrase (optional): <input type="text" name="pass" id="passphrase">
       <br/>
       <input type="submit" value="Submit">
+      <input type="button" value="generate" onclick="document.getElementById('passphrase').value = make_key()">
     </form>
   </body>
 </html>
