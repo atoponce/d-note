@@ -2,9 +2,16 @@
 <html>
   <head>
     <title>Self Destructing Notes</title>
-    <script src="static/js/main.js"></script>
+    <script type="application/javascript" src="static/js/main.js"></script>
+    <script type="application/javascript" src="static/js/hashcash.js"></script>
+    <script type="application/javascript" src="static/js/sha1.js"></script>
+    <script type="application/javascript" src="static/js/fingerprint.js"></script>
+    <script type="application/javascript">
+        var fingerprint = new Fingerprint().get();
+    </script>
+
   </head>
-  <body>
+  <body onload="validate_token(fingerprint)">
     <form method="POST" action="post/{{ random }}">
       Paste your secret note here!
       <br/>
