@@ -1,21 +1,35 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import base64
+import email.utils
 import glob
 import os
+import smtplib
 import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import Blowfish
+from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
 
 dnote = Flask(__name__)
 
-# CHANGEME. Should be at least 16 bytes long.
-# strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 16 | tr -d 'n'; echo
-key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym"
+# BEGIN CHANGEME.
 
+key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym" # Should be at least 16 bytes long.
+fromaddr = "no-reply@example.com"
+fullname = "John Doe"
+
+def send_email(link, recipient):
+    """Send the link via email to a recipient."""
+    msg = MIMEText("%s" % link)
+    msg['To'] = email.utils.formataddr(('Self Destructing Notes', recipient))
+    msg['From'] = email.utils.formataddr((fullname, fromaddr))
+    s = smtplib.SMTP('localhost')
+    s.sendmail(fromaddr, [recipient[, msg.as_string())
+    s.quit()
+    
 def async(func):
     """Return threaded wrapper function."""
     dnote.logger.debug('async decorator')
