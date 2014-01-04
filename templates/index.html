@@ -10,10 +10,10 @@
       <br/>
       <textarea style="width:100%; height:250px" name="paste"></textarea>
       <br/>
-      Passphrase (optional): <input type="text" name="pass" id="passphrase">
+      Passphrase (optional): <input style="font-family:monospace; width:200px;" type="text" name="pass" id="passphrase">
+      <input type="button" value="generate" onclick="document.getElementById('passphrase').value = make_key()">
       <br/>
       <input type="submit" value="Submit">
-      <input type="button" value="generate" onclick="document.getElementById('passphrase').value = make_key()">
     </form>
   </body>
 </html>
