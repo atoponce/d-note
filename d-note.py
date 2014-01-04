@@ -27,7 +27,7 @@ def send_email(link, recipient):
     msg['To'] = email.utils.formataddr(('Self Destructing Notes', recipient))
     msg['From'] = email.utils.formataddr((fullname, fromaddr))
     s = smtplib.SMTP('localhost')
-    s.sendmail(fromaddr, [recipient[, msg.as_string())
+    s.sendmail(fromaddr, [recipient], msg.as_string())
     s.quit()
     
 def async(func):

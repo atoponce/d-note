@@ -4,6 +4,6 @@
     <title>Note Error</title>
   </head>
   <body>
-    <p>Your password was entered in error. <a href="http://127.0.0.1:5000/{{ random }}">Please try again.</a></p>
+    <p>Your password was entered in error. <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Please try again.</a></p>
   </body>
 </html>

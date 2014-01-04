@@ -4,6 +4,6 @@
     <title>Note Created</title>
   </head>
   <body>
-    Your private url is: <input size="40" readonly="readonly" type="text" value="http://127.0.0.1:5000/{{ random }}"/>
+    Your private url is: <input size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/>
   </body>
 </html>
