@@ -1,16 +1,10 @@
 function validate_token(resource) {
-    //var resource = document.getElementById('hashcash').value;
     var randomstring = nonce();
     var d = new Date();
     var yyyymmdd = d.yyyymmdd();
     var pre_token = '1:16:'+yyyymmdd+':'+resource+'::'+randomstring+':';
-    //var start = new Date();
     token = mint_token(pre_token);
-    //var end = new Date();
-    //var fin = (end-start)/1000;
-    //var perf = parseInt(token.split(':')[6], 36);
-    //alert(fin+' seconds\n'+perf/fin+' tokens per second\n'+token);
-    alert(token);
+    document.getElementById("hashcash").value = token;
 }
 
 function nonce() {

@@ -9,18 +9,18 @@
     <script type="application/javascript">
         var fingerprint = new Fingerprint().get();
     </script>
-
   </head>
-  <body onload="validate_token(fingerprint)">
+  <body> 
     <form method="POST" action="post/{{ random }}">
       Paste your secret note here!
       <br/>
       <textarea style="width:100%; height:250px" name="paste"></textarea>
       <br/>
       Passphrase (optional): <input style="font-family:monospace; width:200px;" type="text" name="pass" id="passphrase">
-      <input type="button" value="generate" onclick="document.getElementById('passphrase').value = make_key()">
+      <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
       <br/>
-      <input type="submit" value="Submit">
+      <input type="hidden" id="hashcash" name="hashcash">
+      <input type="submit" id="submit" value="Submit" onclick="validate_token(fingerprint)">
     </form>
   </body>
 </html>

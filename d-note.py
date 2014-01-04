@@ -9,6 +9,7 @@ import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import Blowfish
+from Crypto.Hash import SHA
 from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
@@ -32,7 +33,6 @@ def send_email(link, recipient):
     
 def async(func):
     """Return threaded wrapper function."""
-    dnote.logger.debug('async decorator')
     def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
@@ -41,7 +41,6 @@ def async(func):
 @async
 def note_destroy():
     """Destroy unread notes older than 30 days."""
-    dnote.logger.debug('note_destroy')
     while True:
         start_time = time.time()
         for f in os.listdir('data/'):
@@ -59,13 +58,33 @@ def secure_remove(path):
     Keyword arguments:
     path -- an absolute path to the file to overwrite with random data
     """
-    dnote.logger.debug('secure_remove')
     r = Random.new()
     with open(path, "r+") as f:
         for char in xrange(os.stat(f.name).st_size):
             f.seek(char)
             f.write(chr(r.read(1)))
     os.remove(path)
+
+def verify_hashcash(token):
+    """Return True or False based on the Hashcash token
+
+    Valid Hashcash tokens must start with '0000' in the SHA hexdigest string.
+    If not, then return False to redirect the user to an error page. If the
+    token is valid, but has already been spent, then also return False to
+    redirect the user to na error page. Otherwise, if the token is valid and
+    has not been spent, append it to th hashcash.db file.
+
+    Keyword arguments:
+    token -- a proposed Hashcash token to valide
+    """
+
+    digest = SHA.new(token)
+    with open('hashcash.db', 'a+') as f:
+        if digest.hexdigest()[:4] == '0000' and digest not in f:
+            f.write(token)
+            return True
+        else:
+            return False
 
 def note_encrypt(key, plaintext, new_url, key_file):
     """Encrypt a plaintext to a URI file.
@@ -80,7 +99,6 @@ def note_encrypt(key, plaintext, new_url, key_file):
     new_url -- file to save the encrypted text to
     key_file -- 'True' only if a private key was used for encryption
     """
-    dnote.logger.debug('note_encrypt')
     pad = lambda s: s + (8 - len(s) % 8) * chr(8 - len(s) % 8)
     plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
@@ -98,7 +116,6 @@ def note_decrypt(key, ciphertext):
     key -- private key to decrypt the ciphertext
     ciphertext -- the message to be decrypted
     """
-    dnote.logger.debug('note_decrypt')
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('data/%s' % ciphertext, 'r') as f:
         message = f.read()
@@ -108,7 +125,6 @@ def note_decrypt(key, ciphertext):
 
 def create_url():
     """Return a new random 128-bit URI for retrieval."""
-    dnote.logger.debug('create_url')
     new_url = base64.urlsafe_b64encode(Random.new().read(16))[:22]
     if os.path.exists('data/%s' % new_url):
         create_url()
@@ -117,7 +133,6 @@ def create_url():
 @dnote.route('/', methods = ['POST','GET'])
 def index():
     """Return the index.html for the main application."""
-    dnote.logger.debug('default route')
     error = None
     new_url = create_url()
     return render_template('index.html', random = new_url, error=error)
@@ -131,16 +146,21 @@ def show_post(new_url):
     """
     if request.method == 'POST':
         plaintext = request.form['paste']
-        if request.form['pass']:
+        token = request.form['hashcash']
+        valid_token = verify_hashcash(token)
+        if request.form['pass'] and valid_token:
             privkey = request.form['pass']
             key_file = True
             note_encrypt(privkey, plaintext, new_url, key_file)
-        else:
+            return render_template('post.html', random = new_url)
+        elif not request.form['pass'] and valid_token:
             key_file = False
             note_encrypt(key, plaintext, new_url, key_file)
+            return render_template('post.html', random = new_url)
+        else:
+            return render_template('invalid.html')
     else:
-        error = "Invalid data."
-    return render_template('post.html', random = new_url)
+        return render_template('invalid.html')
 
 @async
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
