@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import email.utils
-import glob
 import os
 import smtplib
 import time
@@ -14,13 +13,14 @@ from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
 
-dnote = Flask(__name__)
-
 # BEGIN CHANGEME.
 key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym" # Should be at least 16 bytes long.
 fromaddr = "no-reply@example.com"
 fullname = "John Doe"
 # END CHANGEME.
+
+dnote = Flask(__name__)
+here = dnote.root_path
 
 def send_email(link, recipient):
     """Send the link via email to a recipient."""
@@ -33,6 +33,7 @@ def send_email(link, recipient):
     
 def async(func):
     """Return threaded wrapper function."""
+    dnote.logger.debug('async')
     def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
@@ -41,9 +42,10 @@ def async(func):
 @async
 def note_destroy():
     """Destroy unread notes older than 30 days."""
+    dnote.logger.debug('note_destroy')
     while True:
         start_time = time.time()
-        for f in os.listdir('data/'):
+        for f in os.listdir('%s/data/' % here):
             file_mtime = os.stat(f)[8]
             if (start_time - file_mtime) > 2592000:
                 secure_remove(f)
@@ -58,6 +60,7 @@ def secure_remove(path):
     Keyword arguments:
     path -- an absolute path to the file to overwrite with random data
     """
+    dnote.logger.debug('secure_remove')
     r = Random.new()
     with open(path, "r+") as f:
         for char in xrange(os.stat(f.name).st_size):
@@ -77,11 +80,11 @@ def verify_hashcash(token):
     Keyword arguments:
     token -- a proposed Hashcash token to valide
     """
-
+    dnote.logger.debug('verify_hashcash')
     digest = SHA.new(token)
-    with open('data/hashcash.db', 'a+') as f:
+    with open('%s/data/hashcash.db' % here, 'a+') as f:
         if digest.hexdigest()[:4] == '0000' and digest not in f:
-            f.write(token)
+            f.write(token+'\n')
             return True
         else:
             return False
@@ -99,12 +102,13 @@ def note_encrypt(key, plaintext, new_url, key_file):
     new_url -- file to save the encrypted text to
     key_file -- 'True' only if a private key was used for encryption
     """
+    dnote.logger.debug('note_encrypt')
     pad = lambda s: s + (8 - len(s) % 8) * chr(8 - len(s) % 8)
     plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
         # create empty file with '.key' as an extension
-        open('data/%s.key' % new_url, 'a').close()
-    with open('data/%s' % new_url, 'w') as f:
+        open('%s/data/%s.key' % (here, new_url), 'a').close()
+    with open('%s/data/%s' % (here,new_url), 'w') as f:
         bf = Blowfish.new(key, Blowfish.MODE_ECB)
         ciphertext = bf.encrypt(plain)
         f.write(ciphertext.encode("base64"))
@@ -116,8 +120,9 @@ def note_decrypt(key, ciphertext):
     key -- private key to decrypt the ciphertext
     ciphertext -- the message to be decrypted
     """
+    dnote.logger.debug('note_decrypt')
     unpad = lambda s : s[0:-ord(s[-1])]
-    with open('data/%s' % ciphertext, 'r') as f:
+    with open('%s/data/%s' % (here, ciphertext), 'r') as f:
         message = f.read()
     bf = Blowfish.new(key, Blowfish.MODE_ECB)
     plaintext = bf.decrypt(message.decode("base64"))
@@ -125,14 +130,16 @@ def note_decrypt(key, ciphertext):
 
 def create_url():
     """Return a new random 128-bit URI for retrieval."""
+    dnote.logger.debug('create_url')
     new_url = base64.urlsafe_b64encode(Random.new().read(16))[:22]
-    if os.path.exists('data/%s' % new_url):
+    if os.path.exists('%s/data/%s' % (here, new_url)):
         create_url()
     return new_url
 
 @dnote.route('/', methods = ['POST','GET'])
 def index():
     """Return the index.html for the main application."""
+    dnote.logger.debug('index')
     error = None
     new_url = create_url()
     return render_template('index.html', random = new_url, error=error)
@@ -144,6 +151,7 @@ def show_post(new_url):
     Keyword arguments:
     new_url -- encrypted file representing the unique URL
     """
+    dnote.logger.debug('show_post')
     if request.method == 'POST':
         plaintext = request.form['paste']
         token = request.form['hashcash']
@@ -170,9 +178,10 @@ def fetch_url(random_url):
     Keyword arguments:
     random_url -- Random URL representing the encrypted note
     """
-    if os.path.exists('data/%s.key' % random_url) and request.method != 'POST':
+    dnote.logger.debug('fetch_url')
+    if os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method != 'POST':
         return render_template('key.html', random = random_url)
-    elif os.path.exists('data/%s.key' % random_url) and request.method == 'POST':
+    elif os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method == 'POST':
         privkey = request.form['pass']
         try:
             plaintext = note_decrypt(privkey, random_url)
