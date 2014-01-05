@@ -11,12 +11,12 @@
     </script>
   </head>
   <body> 
-    <form method="POST" action="post/{{ random }}">
+    <form method="POST" action="{{ url_for('show_post', new_url=random, _external=True ) }}">
       Paste your secret note here!
       <br/>
       <textarea style="width:100%; height:250px" name="paste"></textarea>
       <br/>
-      Passphrase (optional): <input style="font-family:monospace; width:200px;" type="text" name="pass" id="passphrase">
+      Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
       <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
       <br/>
       <input type="hidden" id="hashcash" name="hashcash">
