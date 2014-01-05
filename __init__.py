@@ -17,10 +17,10 @@ from threading import Thread
 dnote = Flask(__name__)
 
 # BEGIN CHANGEME.
-
 key = "cN7RPiuMhJwX1e9MUwuTXggpK9r2ym" # Should be at least 16 bytes long.
 fromaddr = "no-reply@example.com"
 fullname = "John Doe"
+# END CHANGEME.
 
 def send_email(link, recipient):
     """Send the link via email to a recipient."""
@@ -71,7 +71,7 @@ def verify_hashcash(token):
     Valid Hashcash tokens must start with '0000' in the SHA hexdigest string.
     If not, then return False to redirect the user to an error page. If the
     token is valid, but has already been spent, then also return False to
-    redirect the user to na error page. Otherwise, if the token is valid and
+    redirect the user to an error page. Otherwise, if the token is valid and
     has not been spent, append it to th hashcash.db file.
 
     Keyword arguments:
@@ -79,7 +79,7 @@ def verify_hashcash(token):
     """
 
     digest = SHA.new(token)
-    with open('hashcash.db', 'a+') as f:
+    with open('data/hashcash.db', 'a+') as f:
         if digest.hexdigest()[:4] == '0000' and digest not in f:
             f.write(token)
             return True
