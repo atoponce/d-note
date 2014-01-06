@@ -62,7 +62,7 @@ def destroy_note(path):
             if (start_time - file_mtime) >= 180:
                 secure_remove(path)
                 break
-        time.sleep(3600) # wait for 1 minute
+        time.sleep(60) # wait for 1 minute
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
