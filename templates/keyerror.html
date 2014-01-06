@@ -1,9 +1,5 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Note Error</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block title %}Note Error{% endblock %}
+{% block content %}
     <p>Your password was entered in error. <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Please try again.</a></p>
-  </body>
-</html>
+{% endblock %}

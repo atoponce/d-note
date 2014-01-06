@@ -1,9 +1,16 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Note Created</title>
-  </head>
-  <body>
-    Your private url is: <input size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/>
-  </body>
-</html>
+{% extends "base.html" %}
+{% block title %}Note Created{% endblock %}
+{% block head %}
+    <script type="application/javascript">
+        window.onload = function() {
+            var secret = document.getElementById('note');
+            secret.focus ();
+            secret.slecet ();
+        }
+    </script>
+{% endblock %}
+{% block content %}
+<p>Copy this link and send it via email or instant message. Or, <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">you can destroy it now</a>.</p>
+<p>Your private url is: <input id="note" size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/></p>
+<p><a href="{{ url_for('index', _external=True) }}">Create a new note</a></p>
+{% endblock %}
