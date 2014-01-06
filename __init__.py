@@ -59,7 +59,7 @@ def destroy_note(path):
     while True:
         if os.path.exists(path):
             file_mtime = os.stat(path)[8]
-            if (start_time - file_mtime) >= 10800:
+            if (start_time - file_mtime) >= 180:
                 secure_remove(path)
                 break
         time.sleep(3600) # wait for 1 minute
