@@ -44,7 +44,7 @@ def cleanup_unread():
         for note  in os.listdir('%s/data/' % here):
             with open('%s/data/%s' % (here, note)) as f:
                 file_mtime = os.stat(f.name)[8]
-                if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in g:
+                if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
                     secure_remove(f)
         time.sleep(86400) # wait for 1 day
 
