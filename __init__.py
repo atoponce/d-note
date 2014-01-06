@@ -54,7 +54,8 @@ def destroy_note(path):
     Keyword arguments:
     path -- an absolute path to the note to be destroyed
     """
-    os.utime(path, (seek_time, seek_time))
+    start_time = time.time()
+    os.utime(path, (start_time, start_time))
     while True:
         seek_time = time.time()
         if os.path.exists(path):
