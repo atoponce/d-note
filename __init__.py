@@ -63,7 +63,7 @@ def destroy_note(path):
             if (seek_time - file_mtime) >= 180:
                 secure_remove(path)
                 break
-        time.sleep(60) # wait for 1 minute
+        time.sleep(10)
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
@@ -78,7 +78,7 @@ def secure_remove(path):
     with open(path, "r+") as f:
         for char in xrange(os.stat(f.name).st_size):
             f.seek(char)
-            f.write(chr(r.read(1)))
+            f.write(str(r.read(1)))
     os.remove(path)
 
 def verify_hashcash(token):
