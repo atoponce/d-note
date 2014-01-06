@@ -42,15 +42,15 @@ def cleanup_unread():
     start_time = time.time()
     while True:
         for f in os.listdir('%s/data/' % here):
-            file_mtime = os.stat('%s/data/%s', % (here, f))[8]
+            file_mtime = os.stat('%s/data/%s' % (here, f))[8]
             if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
-                secure_remove('%s/data/%s', % (here, f))
+                secure_remove('%s/data/%s' % (here, f))
         time.sleep(86400) # wait for 1 day
 
 @async
 def destroy_note(path):
     """Destroy read note when it is 3 minutes old.
-    
+
     Keyword arguments:
     path -- an absolute path to the note to be destroyed
     """
