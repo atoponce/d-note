@@ -195,7 +195,7 @@ def fetch_url(random_url):
     elif os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method == 'POST':
         privkey = request.form['pass']
         try:
-            open('%s/data/%s.read' % (here, random_url)).close()
+            open('%s/data/%s.lock' % (here, random_url), 'a').close()
             plaintext = note_decrypt(privkey, random_url)
             destroy_note('%s/data/%s' % (here, random_url))
             destroy_note('%s/data/%s.key' % (here, random_url))
@@ -204,7 +204,7 @@ def fetch_url(random_url):
         except:
             return render_template('keyerror.html', random=random_url)
     else:
-        open('%s/data/%s.read' % (here, random_url)).close()
+        open('%s/data/%s.lock' % (here, random_url), 'a').close()
         plaintext = note_decrypt(key, random_url)
         destroy_note('%s/data/%s' % (here, random_url))
         destroy_note('%s/data/%s.lock' % (here, random_url))
