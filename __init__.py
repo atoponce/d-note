@@ -30,7 +30,7 @@ def send_email(link, recipient):
     s.quit()
     
 def async(func):
-    """Return threaded wrapper function."""
+    """Return threaded wrapper decorator."""
     def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
@@ -41,11 +41,10 @@ def cleanup_unread():
     """Destroy unread notes older than 30 days."""
     start_time = time.time()
     while True:
-        for note  in os.listdir('%s/data/' % here):
-            with open('%s/data/%s' % (here, note)) as f:
-                file_mtime = os.stat(f.name)[8]
-                if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
-                    secure_remove(f)
+        for f in os.listdir('%s/data/' % here):
+            file_mtime = os.stat('%s/data/%s', % (here, f))[8]
+            if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
+                secure_remove('%s/data/%s', % (here, f))
         time.sleep(86400) # wait for 1 day
 
 @async
@@ -58,10 +57,10 @@ def destroy_note(path):
     start_time = time.time()
     os.utime(path, (start_time, start_time))
     while True:
-        with open(path, 'r') as f:
-            file_mtime = os.stat(f.name)[8]
+        if os.path.exists(path):
+            file_mtime = os.stat(path)[8]
             if (start_time - file_mtime) >= 10800:
-                secure_remove(f)
+                secure_remove(path)
                 break
         time.sleep(3600) # wait for 1 minute
 
