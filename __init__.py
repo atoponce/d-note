@@ -41,10 +41,11 @@ def cleanup_unread():
     """Destroy unread notes older than 30 days."""
     start_time = time.time()
     while True:
-        for f in os.listdir('%s/data/' % here):
-            file_mtime = os.stat(f.name)[8]
-            if (start_time - file_mtime) >= 2592000 and f != 'hashcash.db':
-                secure_remove(f)
+        for note  in os.listdir('%s/data/' % here):
+            with open('%s/data/%s' % (here, note)) as f:
+                file_mtime = os.stat(f.name)[8]
+                if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in g:
+                    secure_remove(f)
         time.sleep(86400) # wait for 1 day
 
 @async
