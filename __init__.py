@@ -39,11 +39,11 @@ def async(func):
 @async
 def cleanup_unread():
     """Destroy unread notes older than 30 days."""
-    start_time = time.time()
     while True:
+        seek_time = time.time()
         for f in os.listdir('%s/data/' % here):
             file_mtime = os.stat('%s/data/%s' % (here, f))[8]
-            if (start_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
+            if (seek_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
                 secure_remove('%s/data/%s' % (here, f))
         time.sleep(86400) # wait for 1 day
 
@@ -54,12 +54,12 @@ def destroy_note(path):
     Keyword arguments:
     path -- an absolute path to the note to be destroyed
     """
-    start_time = time.time()
     os.utime(path, (start_time, start_time))
     while True:
+        seek_time = time.time()
         if os.path.exists(path):
             file_mtime = os.stat(path)[8]
-            if (start_time - file_mtime) >= 180:
+            if (seek_time - file_mtime) >= 180:
                 secure_remove(path)
                 break
         time.sleep(60) # wait for 1 minute
