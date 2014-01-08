@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Self Destructing Notes{% endblock %}
 {% block head %}
-    <script type="application/javascript" src="static/js/main.js"></script>
-    <script type="application/javascript" src="static/js/hashcash.js"></script>
-    <script type="application/javascript" src="static/js/sha1.js"></script>
-    <script type="application/javascript" src="static/js/fingerprint.js"></script>
+    <script type="application/javascript" src="/static/js/hashcash.js"></script>
+    <script type="application/javascript" src="/static/js/sha1.js"></script>
+    <script type="application/javascript" src="/static/js/fingerprint.js"></script>
     <script type="application/javascript">
         var fingerprint = new Fingerprint().get();
     </script>
@@ -14,11 +13,6 @@
         <h1>d-note</h1>
         <h2>Self destructing encrypted notes</h2>
     </center>
-    <p>A self-hosted web application for self-destructing notes. The idea comes from the fact that email providers, social networks, and other software-as-a-service providers are likely storing your data, even after you have deleted your data, or deleted your account. This web application brings you back into control of your data. <a href="https://github.com/atoponce/d-note">Download the project at Github</a> and host it on your own server.</p>
-    <p>Sending confidential information, such as passwords, account information, social security numbers, credit card numbers, etc. over email, IM or social networks is not secure.</p>
-    <p>This web application takes yoer data, and compresses and encrypts it with Blowfish on disk. The web application does store a default encryption key. As such, you can specify your own encryption key to hand to the recipient, at which point the system administrator would not be able to decrypt the note.</p>
-    <p>Once the recipient views the note, it is automatically destroyed after three minutes. Unread messages are automatically destroyed after 30 days.</p>
-    <p>Other security measures include Hashcash. A valid Hashcash token must be submitted to the server in order to submit a note. This will likely deter spammers, but also require you to have JavaScript enabled.</p>
     <form method="POST" action="{{ url_for('show_post', new_url=random, _external=True) }}">
       Paste your secret note here!
       <br/>

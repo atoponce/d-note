@@ -145,12 +145,27 @@ def create_url():
         create_url()
     return new_url
 
-@dnote.route('/', methods = ['POST','GET'])
+@dnote.route('/', methods = ['GET'])
 def index():
     """Return the index.html for the main application."""
     error = None
     new_url = create_url()
     return render_template('index.html', random = new_url, error=error)
+
+@dnote.route('/security/', methods = ['GET'])
+def security():
+    """Return the index.html for the security page."""
+    return render_template('security.html')
+
+@dnote.route('/faq/', methods = ['GET'])
+def faq():
+    """Return the index.html for the faq page."""
+    return render_template('faq.html')
+
+@dnote.route('/about/', methods = ['GET'])
+def about():
+    """Return the index.html for the about page."""
+    return render_template('about.html')
 
 @dnote.route('/post/<new_url>', methods = ['POST', 'GET'])
 def show_post(new_url):
