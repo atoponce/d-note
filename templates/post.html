@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Note Created{% endblock %}
 {% block head %}
+    <script type="application/javascript" src="{{ url_for('index') }}static/js/qrcode.js"></script>
     <script type="application/javascript">
         window.onload = function() {
             var secret = document.getElementById('note');
@@ -10,7 +11,12 @@
     </script>
 {% endblock %}
 {% block content %}
-<p>Copy this link and send it via email or instant message. Or, <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">you can destroy it now</a>.</p>
-<p>Your private url is: <input id="note" size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/></p>
-<p><a href="{{ url_for('index', _external=True) }}">Create a new note</a></p>
+    <p>Copy this link and send it via email or instant message. Or, <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">you can destroy it now</a>.</p>
+    <p>Your private url is: <input id="note" size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/></p>
+    <p>Alternatively, you can scan this with your mobile device:</p>
+    <div id="qrcode"></div>
+    <script type="text/javascript">
+        new QRCode(document.getElementById("qrcode"), "{{ url_for('fetch_url', random_url=random, _external=True) }}");
+    </script>
+    <p><a href="{{ url_for('index', _external=True) }}">Create a new note</a></p>
 {% endblock %}
