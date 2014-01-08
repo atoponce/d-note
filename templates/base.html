@@ -1,8 +1,8 @@
 <!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
-    <script type="application/javascript" src="/static/js/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('index') }}static/css/main.css"/>
+    <script type="application/javascript" src="{{ url_for('index') }}static/js/main.js"></script>
     {% block head %}
     <title>{% block title %}{% endblock %}</title>
     {% endblock %}
@@ -10,9 +10,9 @@
   <body>
     <div id="header">
         <span class="nav"><a href="{{ url_for('index') }}">Home</a></span>
-        <span class="nav"><a href="/security/">Security</a></span>
-        <span class="nav"><a href="/faq/">FAQ</a></span>
-        <span class="nav"><a href="/about/">About</a></span>
+        <span class="nav"><a href="{{ url_for('security') }}">Security</a></span>
+        <span class="nav"><a href="{{ url_for('faq') }}">FAQ</a></span>
+        <span class="nav"><a href="{{ url_for('about') }}">About</a></span>
     </div>
     <noscript><p>Please enable JavaScript in your browser for better use of the website.</p></noscript>
     <div id="content">
