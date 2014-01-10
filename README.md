@@ -17,8 +17,9 @@ thing:
 And many more. Unfortunately, none of the above sites seem to be interested
 in benefiting the community as a whole by providing their source code, even
 though there seems to be a demand for it. Further, by using a third party
-service, you have no guarantee that they are not sharing your data with the
-NSA. By running your own server, you know who has your data and who doesn't.
+service, you have no guarantee that they are not sharing your data with
+third parties. By running your own server, you know who has your data and
+who doesn't.
 
 The name of the project is inspired by the "H-Bomb", or hydrogen bomb. I
 wanted a clever name for self destructing notes that was not in use, and
@@ -52,8 +53,8 @@ be encrypted. The data is also decrypted on the server, and transmitted to the
 recipient's browser. As such, you should protect the data from being sniffed
 using SSL on this application.
 
-When the note is destroyed, it is first overwritten 3 times with random data,
-then removed. There are a couple benefits from this:
+When the note is destroyed, it is first overwritten once with random data,
+then removed. There are a couple of benefits from this:
 
 * If the underlying filesystem is copy on write, then new random data is
   written to new sectors on disk, making it difficult to know precisely where
@@ -109,11 +110,13 @@ So, a valid URL for your self destructing notes could be:
 
 There are some notes to consider with this URL scheme:
 
-Its format is XXXXXXXXXXXXXXXXXXXXXXO, where 'O' is either AgQw.
+Its format is XXXXXXXXXXXXXXXXXXXXXO, where 'O' is either AgQw.
 
-Regardless, the server would need to be processing 1 billion URLs every
-second for 1,000 years before we reached the probability of 1/2 for
-generating a duplicate URL.
+Regardless, the server would need to be processing approximately 700
+million URLs every second for 1,000 years before we reached the probability
+of 1/2 for generating a duplicate URL. See the [Birthday
+Attack](https://en.wikipedia.org/wiki/Birthday_attack) for more
+information.
 
 d-note does not keep track of which URLs have been generated. Thus, it is
 possible, although highly improbable, that the same URL could be generated
@@ -170,9 +173,9 @@ This is valid, because the SHA1 hash of the above token is:
 
 which starts with 16-bits of leading zeros. The work is forced on the
 client, which inserts the token into the form. Even on modern hardware,
-this should be a strenuous task on the client CPU, and could take up to a
-second or two to create a valid token string. However, the server can
-verify the token quickly (in nanoseconds).
+this should be computationally difficult for the client CPU, and could take
+up to a second or two to create a valid token string. However, verification
+of the token is computationally easy for the server to verify.
 
 The minting of the token should be done in the background while the user is
 typing the note in the form. Thus, when the submit button is pressed, no
@@ -192,7 +195,7 @@ Browser fingerprinting is unique enough to anonymously identify a browser with
 Electronic Frontier Foundation](https://panopticlick.eff.org/). The browser is
 queried for many things:
 
-* Useragent string
+* User agent string
 * Screen color depth
 * Language
 * Installed plugins with supported MIME types
