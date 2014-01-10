@@ -101,7 +101,7 @@ We then encode the string using `base64.urlsafe_b64encode(u.bytes)[:22]`
 from the base64 module. This gives us 22 characters for our URL. The valid
 characters for our URLs are thus:
 
-    ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789-_
+    ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
 
 So, a valid URL for your self destructing notes could be:
 
