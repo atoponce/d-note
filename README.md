@@ -56,12 +56,12 @@ When the note is destroyed, it is first overwritten 3 times with random data,
 then removed. There are a couple benefits from this:
 
 * If the underlying filesystem is copy on write, then new random data is
-  written to new sectorns on disk, making it difficult to know precisely where
+  written to new sectors on disk, making it difficult to know precisely where
   the encrypted file ended and where the random data started.
 * If the underlying filesystem is a journaled filesystem, the journal may have
-  logged entries of the data. But again, because it's encrypted then random, it
-  will be very difficult to know when the encrypted data was stored and when
-  it was overwritten with random data.
+  logged entries of the data. But again, because it's compressed then
+  encrypted, it will be very difficult to know when the encrypted data was
+  stored and when it was overwritten with random data.
 
 Client Side
 -----------
@@ -101,7 +101,7 @@ We then encode the string using `base64.urlsafe_b64encode(u.bytes)[:22]`
 from the base64 module. This gives us 22 characters for our URL. The valid
 characters for our URLs are thus:
 
-    ABCDEFGHIJKLMNOPQRSTUPVXYZabcdefghijklmnopqrstupvxyz0123456789-_
+    ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789-_
 
 So, a valid URL for your self destructing notes could be:
 
