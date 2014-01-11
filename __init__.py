@@ -49,21 +49,12 @@ def cleanup_unread():
 
 @async
 def destroy_note(path):
-    """Destroy read note when it is 3 minutes old.
+    """Destroy read note immediately.
 
     Keyword arguments:
     path -- an absolute path to the note to be destroyed
     """
-    start_time = time.time()
-    os.utime(path, (start_time, start_time))
-    while True:
-        seek_time = time.time()
-        if os.path.exists(path):
-            file_mtime = os.stat(path)[8]
-            if (seek_time - file_mtime) >= 180:
-                secure_remove(path)
-                break
-        time.sleep(10)
+    secure_remove(path)
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
