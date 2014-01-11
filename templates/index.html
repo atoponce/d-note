@@ -9,7 +9,7 @@
     </script>
 {% endblock %}
 {% block content %}
-    <p>Self destructing encrypted notes</p>
+    <h1>Self destructing encrypted notes</h1>
     <form method="POST" action="{{ url_for('show_post', new_url=random, _external=True) }}">
       <p>Paste your secret note here!</p>
       <textarea style="width:100%; height:250px" name="paste"></textarea>

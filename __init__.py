@@ -47,15 +47,6 @@ def cleanup_unread():
                 secure_remove('%s/data/%s' % (here, f))
         time.sleep(86400) # wait for 1 day
 
-@async
-def destroy_note(path):
-    """Destroy read note immediately.
-
-    Keyword arguments:
-    path -- an absolute path to the note to be destroyed
-    """
-    secure_remove(path)
-
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
 
@@ -195,26 +186,22 @@ def fetch_url(random_url):
     Keyword arguments:
     random_url -- Random URL representing the encrypted note
     """
-    if os.path.exists('%s/data/%s.lock' % (here, random_url)):
-        return render_template('404.html')
+    if not os.path.exists('%s/data/%s' % (here,random_url)):
+        return render_template('404.html'), 404
     elif os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method != 'POST':
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method == 'POST':
         privkey = request.form['pass']
         try:
-            open('%s/data/%s.lock' % (here, random_url), 'a').close()
             plaintext = note_decrypt(privkey, random_url)
-            destroy_note('%s/data/%s' % (here, random_url))
-            destroy_note('%s/data/%s.key' % (here, random_url))
-            destroy_note('%s/data/%s.lock' % (here, random_url))
+            secure_remove('%s/data/%s' % (here, random_url))
+            secure_remove('%s/data/%s.key' % (here, random_url))
             return render_template('note.html', text = plaintext)
         except:
             return render_template('keyerror.html', random=random_url)
     else:
-        open('%s/data/%s.lock' % (here, random_url), 'a').close()
         plaintext = note_decrypt(key, random_url)
-        destroy_note('%s/data/%s' % (here, random_url))
-        destroy_note('%s/data/%s.lock' % (here, random_url))
+        secure_remove('%s/data/%s' % (here, random_url))
         return render_template('note.html', text = plaintext)
 
 if __name__ == '__main__':

@@ -11,13 +11,22 @@
     </script>
 {% endblock %}
 {% block content %}
-    <p>Copy this link and send it via email or instant message. Or, <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">you can destroy it now</a>.</p>
-    <p>Your private url is: <input id="note" size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/></p>
-    <p>Alternatively, you can scan this QR code your mobile device.:</p>
+    <p>Copy this link and send it to your recipient. Or, <a href="{{
+    url_for('fetch_url', random_url=random, _external=True) }}">you can destroy
+    it now</a>.</p>
+    <p>Your private url is: <input id="note" size="40" readonly="readonly"
+    type="text" value="{{ url_for('fetch_url', random_url=random,
+    _external=True) }}"/></p>
+    <p>Alternatively, you can scan this QR code, and "share" it using your
+    mobile device via text message, email, etc.</p>
+    <ul>
+        <li>ZXing Barcode users: disable "Retrieve more info" from the
+        settings, otherwise your recipient will <strong>NOT</strong> be able to
+        view the post.</li>
+    </ul>
     <div id="qrcode"></div>
     <script type="text/javascript">
         new QRCode(document.getElementById("qrcode"), { text: "{{ url_for('fetch_url', random_url=random, _external=True) }}", correctLevel: QRCode.CorrectLevel.L });
     </script>
-    <p>Note for ZXing Barcode users: disable "Retrieve more info" from the settings, otherwise you will <strong>NOT</strong> be able to view the post.</p>
     <p><a href="{{ url_for('index', _external=True) }}">Create a new note</a></p>
 {% endblock %}

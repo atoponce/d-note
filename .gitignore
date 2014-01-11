@@ -1,4 +1,3 @@
-data
+data/*
 *.pyc
 .*.swp
-hashcash.db
