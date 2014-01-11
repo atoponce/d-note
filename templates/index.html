@@ -16,7 +16,7 @@
       <br/>
       Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
       <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
-      <br/>
+      <input type="checkbox" value="duress" name="duress">Generate duress key (requires a passphrase to be entered)<br/>
       <input type="hidden" id="hashcash" name="hashcash">
       <input type="submit" id="submit" value="Submit" onclick="validate_token(fingerprint)">
     </form>

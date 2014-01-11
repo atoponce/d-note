@@ -2,11 +2,13 @@ import base64
 import email.utils
 import os
 import smtplib
+import string
 import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import Blowfish
 from Crypto.Hash import SHA
+from Crypto.Random import random
 from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
@@ -46,6 +48,12 @@ def cleanup_unread():
             if (seek_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
                 secure_remove('%s/data/%s' % (here, f))
         time.sleep(86400) # wait for 1 day
+
+def duress_key():
+    """Return a duress key for Big Brother. The duress key is stored on disk in
+    plaintext, and only returns lorem ipsum text."""
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choics(chars) for i in xrange(24))
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
@@ -156,7 +164,7 @@ def show_post(new_url):
     Keyword arguments:
     new_url -- encrypted file representing the unique URL
     """
-    if request.method == 'POST':
+    if request.method == 'POST' and request.form['paste']:
         plaintext = request.form['paste']
         token = request.form['hashcash']
         valid_token = verify_hashcash(token)
