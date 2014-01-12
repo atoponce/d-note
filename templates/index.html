@@ -4,23 +4,22 @@
     <script type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js"></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/sha1-min.js"></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/fingerprint.js"></script>
-    <script type="application/javascript">
-        var fingerprint = new Fingerprint().get();
-    </script>
+    <script type="application/javascript">var fingerprint = new Fingerprint().get();</script>
 {% endblock %}
 {% block content %}
     <h1>Self destructing encrypted notes</h1>
     <form method="POST" onsubmit="return validate_form()" action="{{ url_for('show_post', new_url=random, _external=True) }}">
-      <p>Paste your secret note here!</p>
-      <textarea style="width:100%; height:250px" id="paste" name="paste"></textarea>
-      <br/>
-      Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
-      <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
-      <br/>
-      <input type="checkbox" value="duress" name="duress">Add a duress key.
-      <u title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">What's this?</u>
-      <br/>
-      <input type="hidden" id="hashcash" name="hashcash">
-      <input type="submit" id="submit" value="Submit">
+        <p>Paste your secret note here!</p>
+        <textarea style="width:100%; height:250px" id="paste" name="paste"></textarea>
+        <br/>
+        Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
+        <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
+        <br/>
+        <input type="checkbox" name="duress">Add a duress key.
+        <u title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">What's this?</u>
+        <br/>
+        <input type="hidden" id="hashcash" name="hashcash">
+        <input type="submit" id="submit" value="Submit">
+        <span id="progress" style="visibility:hidden;">Please be patient while token is calculated...</span>
     </form>
 {% endblock %}
