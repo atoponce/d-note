@@ -180,7 +180,7 @@ def show_post(new_url):
         else:
             return render_template('invalid.html')
     else:
-        return render_template('invalid.html')
+        return render_template('empty.html')
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):

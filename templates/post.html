@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Note Created{% endblock %}
 {% block head %}
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/qrcode.js"></script>
+    <script type="application/javascript" src="{{ url_for('index') }}static/js/qrcode-min.js"></script>
     <script type="application/javascript">
         window.onload = function() {
             var secret = document.getElementById('note');

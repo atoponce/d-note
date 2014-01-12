@@ -2,7 +2,7 @@
 {% block title %}Self Destructing Notes{% endblock %}
 {% block head %}
     <script type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js"></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/sha1.js"></script>
+    <script type="application/javascript" src="{{ url_for('index') }}static/js/sha1-min.js"></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/fingerprint.js"></script>
     <script type="application/javascript">
         var fingerprint = new Fingerprint().get();
