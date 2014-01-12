@@ -6,7 +6,7 @@
         window.onload = function() {
             var secret = document.getElementById('note');
             secret.focus ();
-            secret.slecet ();
+            secret.select ();
         }
     </script>
 {% endblock %}
@@ -14,9 +14,15 @@
     <p>Copy this link and send it to your recipient. Or, <a href="{{
     url_for('fetch_url', random_url=random, _external=True) }}">you can destroy
     it now</a>.</p>
-    <p>Your private url is: <input id="note" size="40" readonly="readonly"
+    <p>Your private url: <input id="note" size="40" readonly="readonly"
     type="text" value="{{ url_for('fetch_url', random_url=random,
     _external=True) }}"/></p>
+    {% if privkey %}
+    <p>Your private  key: <input size="40" readonly="readonly" type="text" value="{{ privkey }}"/></p>
+    {% endif %}
+    {% if duress %}
+    <p>Your duress key: <input size="40" readonly="readonly" type="text" value="{{ duress }}"/></p>
+    {% endif %}
     <p>Alternatively, you can scan this QR code, and "share" it using your
     mobile device via text message, email, etc.</p>
     <ul>

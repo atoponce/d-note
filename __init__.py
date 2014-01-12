@@ -49,11 +49,15 @@ def cleanup_unread():
                 secure_remove('%s/data/%s' % (here, f))
         time.sleep(86400) # wait for 1 day
 
-def duress_key():
+def duress_key(random_url):
     """Return a duress key for Big Brother. The duress key is stored on disk in
     plaintext, and only returns lorem ipsum text."""
     chars = string.ascii_letters + string.digits
-    return ''.join(random.choics(chars) for i in xrange(24))
+    dkey = ''.join(random.choice(chars) for i in xrange(24))
+    f = open('%s/data/%s.dkey' % (here,random_url), 'w')
+    f.write(dkey)
+    f.close()
+    return dkey
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
@@ -169,14 +173,16 @@ def show_post(new_url):
         token = request.form['hashcash']
         valid_token = verify_hashcash(token)
         if request.form['pass'] and valid_token:
+            if request.form['duress']:
+                dkey = duress_key(new_url)
             privkey = request.form['pass']
             key_file = True
             note_encrypt(privkey, plaintext, new_url, key_file)
-            return render_template('post.html', random = new_url)
+            return render_template('post.html', random=new_url, duress=dkey, privkey=privkey)
         elif not request.form['pass'] and valid_token:
             key_file = False
             note_encrypt(key, plaintext, new_url, key_file)
-            return render_template('post.html', random = new_url)
+            return render_template('post.html', random=new_url)
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
@@ -196,13 +202,21 @@ def fetch_url(random_url):
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,random_url)) and request.method == 'POST':
         privkey = request.form['pass']
-        try:
-            plaintext = note_decrypt(privkey, random_url)
-            secure_remove('%s/data/%s' % (here, random_url))
-            secure_remove('%s/data/%s.key' % (here, random_url))
-            return render_template('note.html', text = plaintext)
-        except:
-            return render_template('keyerror.html', random=random_url)
+        if os.path.exists('%s/data/%s.dkey' % (here,random_url)):
+            with open('%s/data/%s.dkey' % (here,random_url), 'r') as f:
+                if privkey in f:
+                    secure_remove('%s/data/%s' % (here, random_url))
+                    secure_remove('%s/data/%s.key' % (here, random_url))
+                    secure_remove('%s/data/%s.dkey' % (here, random_url))
+                    return render_template('404.html'), 404
+                else:
+                    try:
+                        plaintext = note_decrypt(privkey, random_url)
+                        secure_remove('%s/data/%s' % (here, random_url))
+                        secure_remove('%s/data/%s.key' % (here, random_url))
+                        return render_template('note.html', text = plaintext)
+                    except:
+                        return render_template('keyerror.html', random=random_url)
     else:
         plaintext = note_decrypt(key, random_url)
         secure_remove('%s/data/%s' % (here, random_url))
