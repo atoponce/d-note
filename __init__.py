@@ -177,10 +177,6 @@ def show_post(new_url):
             key_file = False
             note_encrypt(key, plaintext, new_url, key_file)
             return render_template('post.html', random = new_url)
-        else:
-            return render_template('invalid.html')
-    else:
-        return render_template('empty.html')
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):

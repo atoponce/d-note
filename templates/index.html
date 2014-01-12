@@ -10,9 +10,9 @@
 {% endblock %}
 {% block content %}
     <h1>Self destructing encrypted notes</h1>
-    <form method="POST" action="{{ url_for('show_post', new_url=random, _external=True) }}">
+    <form method="POST" onsubmit="return validate_form()" action="{{ url_for('show_post', new_url=random, _external=True) }}">
       <p>Paste your secret note here!</p>
-      <textarea style="width:100%; height:250px" name="paste"></textarea>
+      <textarea style="width:100%; height:250px" id="paste" name="paste"></textarea>
       <br/>
       Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
       <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
@@ -21,6 +21,6 @@
       <u title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">What's this?</u>
       <br/>
       <input type="hidden" id="hashcash" name="hashcash">
-      <input type="submit" id="submit" value="Submit" onclick="validate_token(fingerprint)">
+      <input type="submit" id="submit" value="Submit">
     </form>
 {% endblock %}
