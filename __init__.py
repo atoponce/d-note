@@ -54,9 +54,8 @@ def duress_key(random_url):
     plaintext, and only returns lorem ipsum text."""
     chars = string.ascii_letters + string.digits
     dkey = ''.join(random.choice(chars) for i in xrange(24))
-    f = open('%s/data/%s.dkey' % (here,random_url), 'w')
-    f.write(dkey)
-    f.close()
+    with open('%s/data/%s.dkey' % (here,random_url), 'w') as f:
+        f.write(dkey)
     return dkey
 
 def secure_remove(path):
@@ -168,17 +167,21 @@ def show_post(new_url):
     Keyword arguments:
     new_url -- encrypted file representing the unique URL
     """
-    if request.method == 'POST' and request.form['paste']:
+    if request.method == 'POST':
         plaintext = request.form['paste']
         token = request.form['hashcash']
         valid_token = verify_hashcash(token)
-        if request.form['pass'] and valid_token:
-            if request.form['duress']:
-                dkey = duress_key(new_url)
+        if request.form.get('duress', False) and request.form['pass'] and valid_token:
+            dkey = duress_key(new_url)
             privkey = request.form['pass']
             key_file = True
             note_encrypt(privkey, plaintext, new_url, key_file)
-            return render_template('post.html', random=new_url, duress=dkey, privkey=privkey)
+            return render_template('post.html', random=new_url, privkey=privkey, duress=dkey)
+        elif request.form['pass'] and valid_token:
+            privkey = request.form['pass']
+            key_file = True
+            note_encrypt(privkey, plaintext, new_url, key_file)
+            return render_template('post.html', random=new_url, privkey=privkey)
         elif not request.form['pass'] and valid_token:
             key_file = False
             note_encrypt(key, plaintext, new_url, key_file)
@@ -214,9 +217,21 @@ def fetch_url(random_url):
                         plaintext = note_decrypt(privkey, random_url)
                         secure_remove('%s/data/%s' % (here, random_url))
                         secure_remove('%s/data/%s.key' % (here, random_url))
+                        if os.path.exists('%s/data/%s.dkey' % (here, random_url)):
+                            secure_remove('%s/data/%s.dkey' % (here, random_url))
                         return render_template('note.html', text = plaintext)
                     except:
                         return render_template('keyerror.html', random=random_url)
+        else:
+            try:
+                plaintext = note_decrypt(privkey, random_url)
+                secure_remove('%s/data/%s' % (here, random_url))
+                secure_remove('%s/data/%s.key' % (here, random_url))
+                if os.path.exists('%s/data/%s.dkey' % (here, random_url)):
+                    secure_remove('%s/data/%s.dkey' % (here, random_url))
+                return render_template('note.html', text = plaintext)
+            except:
+                return render_template('keyerror.html', random=random_url)
     else:
         plaintext = note_decrypt(key, random_url)
         secure_remove('%s/data/%s' % (here, random_url))
