@@ -10,7 +10,7 @@ the link can never be used again for displaying the same note.
 See [the installation instructions](/INSTALL.md) on how to install this on your
 server.
 
-Read [the documentation](/docs) about further information regarding this
+Read [the documentation](/doc) about further information regarding this
 project.
 
 This project is licensed under the GNU General Public License, version 3. See
