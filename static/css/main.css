@@ -9,10 +9,29 @@ body {
 }
 
 .title {
-    font-size: 200%;
+    font-size: 150%;
     font-weight: bold;
 }
 
 .desc {
     margin: 0 20px;
+}
+
+.nav {
+    margin-right: 25px;
+}
+
+.tooltip {
+    background: #c9c9c9;
+    border-radius: 20px;
+    color: white;
+    cursor: help;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 5x;
+    padding: 0px 4px;
+}
+
+.tooltip:hover {
+    background: #a1a4c9;
 }

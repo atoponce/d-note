@@ -16,10 +16,10 @@
         <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
         <br/>
         <input type="checkbox" name="duress">Add a duress key.
-        <u title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">What's this?</u>
+        <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
         <br/>
         <input type="hidden" id="hashcash" name="hashcash">
         <input type="submit" id="submit" value="Submit">
-        <span id="progress" style="visibility:hidden;">Please be patient while token is calculated...</span>
+        <span id="progress">(Please be patient while token is calculated.)</span>
     </form>
 {% endblock %}
