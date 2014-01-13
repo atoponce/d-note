@@ -1,12 +1,23 @@
 {% extends "base.html" %}
 {% block title %}About - Self Destructing Notes{% endblock %}
 {% block content %}
-    <p>This site is powered by <a
-    href="https://github.com/atoponce/d-note">d-note</a>, a Free and Open
-    Source Python web application written in Flask. d-note is a self
-    destructing notes application. The idea comes from spy movies, such as
-    Mission Impossible, where the spy will receive his next assignment,
-    shortly after which the message will self-destruct. Message self-destruct
-    after 3 minutes of being viewed. Unread notes will self-destruct 30 days
-    after creation.</p>
+    <h2>Free and Open Source Software</h2>
+    <p><a href="https://github.com/atoponce/d-note">d-note</a> is a Free and
+    Open Source Python web application written in Flask. It is licensed under
+    the GPLv3, and is available for you to host on your own server.</p>
+    <h2>What is it?</h2>
+    <p>It is a platform for sending secure messages that self-destruct
+    immediately after being read. Unread messages are automatically deleted
+    after 30 days. As such, this application is suitable for sending private
+    information such as PINs, usernames, passwords, and other sensitive
+    information over insecure channels.</p>
+    <h2>Security</h2>
+    <p>All notes are encrypted on the server, and decrypted when the recipient
+    views the note. The note can only be viewed once, and the note is securely
+    destroyed on the server by overwriting the note with random data before
+    deletion. Private passwords can be used to encrypt the note, instead of
+    using the default server password. Private passwords are never stored on
+    disk. In addition to private passwords, duress keys can be generated which
+    will immediately destroy the note without decrypting it, in case you are
+    being forced to provide the private password that decrypts the note.</p>
 {% endblock %}
