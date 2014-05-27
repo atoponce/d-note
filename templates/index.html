@@ -9,13 +9,22 @@
 {% block content %}
     <h1>Self destructing encrypted notes</h1>
     <form method="POST" onsubmit="return validate_form()" action="{{ url_for('show_post', new_url=random, _external=True) }}">
+        {% if error %}
+            <p class="error">
+            {% if error == "hashcash" %}
+                HashCash token is invalid. Please make sure JavaScript is enabled and try again.
+            {% elif error == "duress" %}
+                You must specify a passphrase if you enable the use of a duress key.
+            {% endif %}
+            </p>
+        {% endif %}
         <p>Paste your secret note here!</p>
         <textarea style="width:100%; height:250px" id="paste" name="paste"></textarea>
         <br/>
         Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
         <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
         <br/>
-        <input type="checkbox" name="duress">Add a duress key.
+        <input type="checkbox" id="duress" name="duress">Add a duress key.
         <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
         <br/>
         <input type="hidden" id="hashcash" name="hashcash">

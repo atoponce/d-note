@@ -88,7 +88,7 @@ def verify_hashcash(token):
     """
     digest = SHA.new(token)
     with open('%s/data/hashcash.db' % here, 'a+') as f:
-        if digest.hexdigest()[:4] == '0000' and digest not in f:
+        if digest.hexdigest()[:4] == '0000' and token not in f.read():
             f.write(token+'\n')
             return True
         else:
@@ -141,7 +141,7 @@ def create_url():
 @dnote.route('/', methods = ['GET'])
 def index():
     """Return the index.html for the main application."""
-    error = None
+    error = request.args.get('error',None)
     new_url = create_url()
     return render_template('index.html', random = new_url, error=error)
 
@@ -160,32 +160,32 @@ def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
 
-@dnote.route('/post/<new_url>', methods = ['POST', 'GET'])
+@dnote.route('/post/<new_url>', methods = ['POST'])
 def show_post(new_url):
     """Return the random URL after posting the plaintext.
     
     Keyword arguments:
     new_url -- encrypted file representing the unique URL
     """
-    if request.method == 'POST':
-        plaintext = request.form['paste']
-        token = request.form['hashcash']
-        valid_token = verify_hashcash(token)
-        if request.form.get('duress', False) and request.form['pass'] and valid_token:
-            dkey = duress_key(new_url)
-            privkey = request.form['pass']
-            key_file = True
-            note_encrypt(privkey, plaintext, new_url, key_file)
-            return render_template('post.html', random=new_url, privkey=privkey, duress=dkey)
-        elif request.form['pass'] and valid_token:
-            privkey = request.form['pass']
-            key_file = True
-            note_encrypt(privkey, plaintext, new_url, key_file)
-            return render_template('post.html', random=new_url, privkey=privkey)
-        elif not request.form['pass'] and valid_token:
-            key_file = False
-            note_encrypt(key, plaintext, new_url, key_file)
-            return render_template('post.html', random=new_url)
+    plaintext = request.form['paste']
+    privkey = request.form.get('pass',False)
+    duress = request.form.get('duress',False)
+    token = request.form.get('hashcash','')
+    if not verify_hashcash(token):
+        return redirect(url_for('index',error='hashcash'))
+    if duress and not privkey:
+        return redirect(url_for('index',error='duress'))
+
+    if duress and privkey:
+        dkey = duress_key(new_url)
+        note_encrypt(privkey, plaintext, new_url, True)
+        return render_template('post.html', random=new_url, privkey=privkey, duress=dkey)
+    elif privkey:
+        note_encrypt(privkey, plaintext, new_url, True)
+        return render_template('post.html', random=new_url, privkey=privkey)
+    else:
+        note_encrypt(key, plaintext, new_url, False)
+        return render_template('post.html', random=new_url)
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
