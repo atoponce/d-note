@@ -35,3 +35,7 @@ body {
 .tooltip:hover {
     background: #a1a4c9;
 }
+
+#progress {
+    visibility: hidden;
+}
