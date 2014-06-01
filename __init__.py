@@ -37,6 +37,9 @@ non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
 dnote = Flask(__name__)
 here = dnote.root_path
 
+if not os.path.exists('%s/data/' % here):
+    os.makedirs('%s/data' % here)
+
 def send_email(link, recipient):
     """Send the link via email to a recipient."""
     msg = MIMEText("%s" % link)
@@ -127,6 +130,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
+
     with open('%s/data/%s' % (here,fname), 'w') as f:
         iv = Random.new().read(BLOCK_SIZE)
         aes = AES.new(key, AES.MODE_CBC, iv)
