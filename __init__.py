@@ -123,7 +123,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     fname -- file to save the encrypted text to.
     """
     pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
-    plain = pad(plaintext.encode('utf-8'))
+    plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
@@ -162,7 +162,7 @@ def note_decrypt(key, mac_key, fname):
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
-    return hmac_check,unpad(plaintext).decode('utf-8')
+    return hmac_check,zlib.decompress(unpad(plaintext)).decode('utf-8')
 
 def create_url():
     """Generate enough randomness for filename, AES key, MAC key:
