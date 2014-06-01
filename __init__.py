@@ -19,18 +19,20 @@ from threading import Thread
 # BEGIN CHANGEME.
 fromaddr = "no-reply@example.com"
 fullname = "John Doe"
-salt1 = "52f9a7242412eed8d607f80a4a97d41b" # Output from Random.new().read(16).encode("hex")
+salt1 = "52f9a7242412eed8d607f80a4a97d41b" # Random.new().read(16).encode("hex")
 salt2 = "a79f3ab9732cb999afec457267e49fea"
-
 # END CHANGEME.
-
 
 # SOME CONSTANTS
 FILE_NAME_LENGTH = 16 # number of bytes of randomness for file names
 BLOCK_SIZE = 16 # for AES128 
 MAC_SIZE = 20 # for HMAC-SHA1
-DURESS_TEXT = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
+DURESS_TEXT = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed \
+do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad \
+minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
+commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit \
+esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat \
+non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
 
 dnote = Flask(__name__)
 here = dnote.root_path
@@ -78,7 +80,7 @@ def secure_remove(path):
     it's journaled, copy-on-write, or whatever.
 
     Keyword arguments:
-    path -- an absolute path to the file to overwrite with random data
+    path -- an absolute path to the file to overwrite with random data.
     """
     r = Random.new()
     with open(path, "r+") as f:
@@ -94,10 +96,10 @@ def verify_hashcash(token):
     If not, then return False to redirect the user to an error page. If the
     token is valid, but has already been spent, then also return False to
     redirect the user to an error page. Otherwise, if the token is valid and
-    has not been spent, append it to th hashcash.db file.
+    has not been spent, append it to the hashcash.db file.
 
     Keyword arguments:
-    token -- a proposed Hashcash token to valide
+    token -- a proposed Hashcash token to validate.
     """
     digest = SHA.new(token)
     with open('%s/data/hashcash.db' % here, 'a+') as f:
@@ -111,14 +113,14 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     """Encrypt a plaintext to a URI file.
 
     All files are encrypted with AES in CBC mode. HMAC-SHA1 is used
-    to provide authenticated encryption ( encrypt then mac ). No private keys are stored 
-    on the server
+    to provide authenticated encryption ( encrypt then mac ). No private keys
+    are stored on the server.
 
     Keyword arguments:
-    key -- aes private key to encrypt the plaintext
-    hmac_key -- hmac-sha1 key for authenticated encryption
-    plaintext -- the message to be encrypted
-    fname -- file to save the encrypted text to
+    key -- aes private key to encrypt the plaintext.
+    hmac_key -- hmac-sha1 key for authenticated encryption.
+    plaintext -- the message to be encrypted.
+    fname -- file to save the encrypted text to.
     """
     pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
     plain = pad(plaintext.encode('utf-8'))
@@ -163,13 +165,13 @@ def note_decrypt(key, mac_key, fname):
     return hmac_check,unpad(plaintext).decode('utf-8')
 
 def create_url():
-    """Generate enough randomness for filename, aes key, mac key.
+    """Generate enough randomness for filename, AES key, MAC key:
      
-    128 bits for file name
-    128 bits for AES-128 key
-    160 bits for HMAC-SHA1 key      
+        - 128 bits for file name
+        - 128 bits for AES-128 key
+        - 160 bits for HMAC-SHA1 key      
   
-    and encode it into 70byte URI
+    Encode into a 70-byte URI.
     """
     uri_rand=Random.new().read(52) 
     fname = base64.urlsafe_b64encode(uri_rand[:16])[:22]
@@ -192,8 +194,6 @@ def decode_url(url):
     key = uri_rand[16:32] # 16 bytes for AES key
     mac_key = uri_rand[32:] # 20 bytes for HMAC
     return {"key": key, "mac_key": mac_key, "fname":fname}
-
- 
 
 @dnote.route('/', methods = ['GET'])
 def index():
@@ -259,7 +259,7 @@ def fetch_url(random_url):
     """Return the decrypted note. Begin short destruction timer.
     
     Keyword arguments:
-    random_url -- Random URL representing the encrypted note
+    random_url -- Random URL representing the encrypted note.
     """
     url_data=decode_url(random_url)
     key = url_data["key"]
