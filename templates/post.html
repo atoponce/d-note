@@ -16,9 +16,9 @@
     it now</a>.</p>
     <p>Your private url:<br/>
     <input id="note" size="40" readonly="readonly" type="text" value="{{ url_for('fetch_url', random_url=random, _external=True) }}"/></p>
-    {% if privkey %}
-    <p>Your private  key:<br/>
-    <input size="40" readonly="readonly" type="text" value="{{ privkey }}"/></p>
+    {% if passphrase %}
+    <p>Your passphrase:<br/>
+    <input size="40" readonly="readonly" type="text" value="{{ passphrase }}"/></p>
     {% endif %}
     {% if duress %}
     <p>Your duress key:<br/>
