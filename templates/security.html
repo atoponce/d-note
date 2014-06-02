@@ -25,10 +25,12 @@
     </div>
     <div class="section">
         <p class="title">Private Passwords</p>
-        <p class="desc">The application uses a shared password server-side that
-        is used for the encryption and decryption of all the notes. However, the
+        <p class="desc">The application uses a default password that is stored
+        in the URL and is port of  the encryption and decryption of all the notes. However, the
         application supports using custom passwords to encrypt and decrypt the
-        note. Even though the private password is not stored by default in the
+        note. This custom password is created using a password-based key
+        derivation function, which in turn is also stored in the URL. Even
+        though the private password is not stored to disk by default in the
         application, this does not prevent the system administrator from
         modifying the code to do so. Therefore, it is best that you host this
         application yourself, on your own server.</p>
