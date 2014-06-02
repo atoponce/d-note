@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Key submission{% endblock %}
 {% block content %}
-    <p>Please provide your private key, so I can decrypt the note for you:</p>
+    <p>Please provide your private passphrase, so I can decrypt the note for you:</p>
     <form method="POST" action="{{ random }}">
         <input type="text" name="pass">
         <input type="submit" value="Submit">
