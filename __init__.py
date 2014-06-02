@@ -25,12 +25,6 @@ salt2 = "a79f3ab9732cb999afec457267e49fea"
 # SOME CONSTANTS
 BLOCK_SIZE = 16 # for AES128 
 MAC_SIZE = 20 # for HMAC-SHA1
-DURESS_TEXT = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed \
-do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad \
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
-commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit \
-esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat \
-non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
 
 dnote = Flask(__name__)
 here = dnote.root_path
@@ -73,6 +67,16 @@ def duress_key(random_url):
     with open('%s/data/%s.dkey' % (here,random_url), 'w') as f:
         f.write(dkey)
     return dkey
+
+def zen():
+    """Return 5 random sentences of the Zen of Python."""
+    import subprocess
+    text = ''
+    p = subprocess.Popen(('python','-c','import this'), stdout=subprocess.PIPE,)
+    s = [x for x in p.communicate()[0].splitlines() if x != '']
+    for i in range(5):
+        text = text + Random.random.choice(s) + ' '
+    return text
 
 def secure_remove(path):
     """Securely overwrite any file, then remove the file.
@@ -283,7 +287,7 @@ def fetch_url(random_url):
                     secure_remove('%s/data/%s.key' % (here, fname))
                     secure_remove('%s/data/%s.dkey' % (here, fname))
                     # return render_template('404.html'), 404
-                    return render_template('note.html', text = DURESS_TEXT)
+                    return render_template('note.html', text = zen())
                 else:
                     try:
                         hmac_check,plaintext = note_decrypt(key, mac_key, fname)
