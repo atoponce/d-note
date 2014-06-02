@@ -1,17 +1,16 @@
 import base64
 import email.utils
 import os
+import pbkdf2
 import smtplib
 import string
 import time
 import zlib
-import Crypto
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA
 from Crypto.Random import random
-from pbkdf2 import PBKDF2
 from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
 from threading import Thread
@@ -70,7 +69,7 @@ def duress_key(random_url):
     """Return a duress key for Big Brother. The duress key is stored on disk in
     plaintext, and only returns lorem ipsum text."""
     chars = string.ascii_letters + string.digits
-    dkey = ''.join(random.choice(chars) for i in xrange(24))
+    dkey = ''.join(Random.random.choice(chars) for i in xrange(24))
     with open('%s/data/%s.dkey' % (here,random_url), 'w') as f:
         f.write(dkey)
     return dkey
@@ -136,7 +135,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         ciphertext = aes.encrypt(plain)
         ciphertext = iv + ciphertext
         # generate a hmac tag
-        hmac = HMAC.new(mac_key,ciphertext,Crypto.Hash.SHA)
+        hmac = HMAC.new(mac_key,ciphertext,SHA)
         ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext.encode("base64"))
 
@@ -161,7 +160,7 @@ def note_decrypt(key, mac_key, fname):
     plaintext = aes.decrypt(body)
     # check the message tags, return 0 if is good 
     # constant time comparison
-    tag2 = HMAC.new(mac_key,data,Crypto.Hash.SHA).digest()
+    tag2 = HMAC.new(mac_key,data,SHA).digest()
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
@@ -240,15 +239,15 @@ def show_post(new_url):
         if request.form.get('duress', False) and request.form['pass'] and valid_token:
             dkey = duress_key(fname)
             passphrase = request.form['pass']
-            key = PBKDF2(passphrase, salt1.decode("hex")).read(16)
-            mac_key = PBKDF2(passphrase, salt2.decode("hex")).read(20)
+            key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
+            mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
             key_file = True
             note_encrypt(key, mac_key, plaintext, fname, key_file)
             return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
         elif request.form['pass'] and valid_token:
             passphrase = request.form['pass']
-            key = PBKDF2(passphrase, salt1.decode("hex")).read(16)
-            mac_key = PBKDF2(passphrase, salt2.decode("hex")).read(20)
+            key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
+            mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
             key_file = True
             note_encrypt(key, mac_key, plaintext, fname, key_file)
             return render_template('post.html', random = new_url, passphrase = passphrase)
@@ -275,8 +274,8 @@ def fetch_url(random_url):
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,fname)) and request.method == 'POST':
         passphrase = request.form['pass']
-        key = PBKDF2(passphrase, salt1.decode("hex")).read(16)
-        mac_key = PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
         if os.path.exists('%s/data/%s.dkey' % (here,fname)):
             with open('%s/data/%s.dkey' % (here,fname), 'r') as f:
                 if passphrase in f:
