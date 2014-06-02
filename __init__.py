@@ -184,7 +184,7 @@ def create_url():
     key = uri[16:32] # 16 bytes for AES key
     mac_key = uri[32:] # 20 bytes for HMAC
     if os.path.exists('%s/data/%s' % (here, fname)):
-        create_url()
+        return create_url()
     # remove the last 2 "==" from the url
     new_url = base64.urlsafe_b64encode(uri)[:70]
     return {"new_url": new_url, "key": key, "mac_key": mac_key, "fname": fname}
