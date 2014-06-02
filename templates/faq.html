@@ -8,9 +8,7 @@
         <li><a href="#undo">How do I undo sending a note?</a></li>
         <li><a href="#multiple">Can I send a note to multiple
         recipients?</a></li>
-        <li><a href="#shared">How secure is the shared password on the
-        server?</a></li>
-        <li><a href="#private">How secure is the private password?</a></li>
+        <li><a href="#passphrase">How secure is the private passphrase?</a></li>
         <li><a href="#duress">What is a duress key?</a></li>
         <li><a href="#javascript">Why am I forced to use JavaScript?</a></li>
         <li><a href="#hashcash">What is a hashcash token?</a></li>
@@ -29,7 +27,7 @@
     href="://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES cipher</a>
     using CBC mode. Part of the encryption includes using <a
     href="https://en.wikipedia.org/wiki/HMAC">HMAC-SHA1</a> to maintain data
-    integrity and authentication of the encrypted messeg. The keys used are not
+    integrity and authentication of the encrypted message. The keys used are not
     stored in disk, and instead are part of the URL. After the note has been
     encrypted, it is then stored on disk.</p>
 
@@ -54,23 +52,15 @@
     destroy the note by just visiting the link. Once the note has been viewed,
     the note is destroyed, and will no longer be available.</p>
 
-    <p class="title"id="muiltple">Can I send a note to multiple recipients?</p>
+    <p class="title"id="multiple">Can I send a note to multiple recipients?</p>
     <p class="desc">No, you cannot. This web application is designed for single
     viewing only. If you want to send a note to multiple recipients, then you
     must create multiple notes, one for each person.</p>
 
-    <p class="title"id="shared">How secure is the shared password on the
-    server?</p>
-    <p class="desc">The security of the shared password on the server is
-    determined by the system administrator running this application. This
-    application should run with only root and web software privileges. No other
-    user on the system is needed to see the document root of the d-note
-    application.</p>
-
-    <p class="title"id="private">How secure is the private password?</p>
+    <p class="title"id="passphrase">How secure is the private passphrase?</p>
     <p class="desc">Because the note encryption is symmetric cryptography,
     anyone with the encryption key can decrypt the note, and view its contents.
-    As such, it is critical that the private key be private, only between the
+    As such, it is critical that the private passphrase be private, only between the
     sender and the recipient.</p>
 
     <p class="title"id="duress">What is a duress key?</p>

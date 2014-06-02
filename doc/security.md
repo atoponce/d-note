@@ -6,8 +6,8 @@ Server Side
 
 All notes are compressed using ZLIB and encrypted using AES in CBC mode with
 HMAC-SHA1 before being written to disk. Never at any point is the note in
-plaintext on disk, and the keys used for HMAC-SHA1 are part of the URL, and also
-never stored on disk.
+plaintext on disk, and the keys used for AES encryption and HMAC-SHA1 tag are 
+part of the URL, and also never stored on disk.
 
 Although I cannot enforce this, you should serve the application over SSL. The
 plaintext must be transmitted between the browser and the server, before it can
