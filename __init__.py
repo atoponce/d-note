@@ -1,19 +1,13 @@
 import base64
-import email.utils
 import os
 import pbkdf2
-import smtplib
-import string
-import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA
 from Crypto.Random import random
-from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
-from threading import Thread
 
 # BEGIN CHANGEME.
 fromaddr = "no-reply@example.com"
@@ -34,6 +28,10 @@ if not os.path.exists('%s/data/' % here):
 
 def send_email(link, recipient):
     """Send the link via email to a recipient."""
+    import email.utils
+    import smtplib
+    import time
+    from email.mime.text import MIMEText
     msg = MIMEText("%s" % link)
     msg['To'] = email.utils.formataddr(('Self Destructing Notes', recipient))
     msg['From'] = email.utils.formataddr((fullname, fromaddr))
@@ -43,6 +41,7 @@ def send_email(link, recipient):
     
 def async(func):
     """Return threaded wrapper decorator."""
+    from threading import Thread
     def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
@@ -62,6 +61,7 @@ def cleanup_unread():
 def duress_key(random_url):
     """Return a duress key for Big Brother. The duress key is stored on disk in
     plaintext, and only returns lorem ipsum text."""
+    import string
     chars = string.ascii_letters + string.digits
     dkey = ''.join(Random.random.choice(chars) for i in xrange(24))
     with open('%s/data/%s.dkey' % (here,random_url), 'w') as f:
