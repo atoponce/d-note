@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Private Note{% endblock %}
 {% block head %}
-    <meta http-equiv="Refresh" content="180"; url="{{ url_for('index', _external=True) }}" />
+    <meta http-equiv="Refresh" content="180"; url="{{ url_for('index',
+    _external=True) }}" />
     <script type="text/javascript">
-        setTimeout(function(){window.location.href="{{ url_for('index', _external=True) }}"}, 180000);
+        setTimeout(function(){window.location.href="{{ url_for('index',
+        _external=True) }}"}, 180000);
     </script>
 {% endblock %}
 {% block content %}
