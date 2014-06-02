@@ -24,7 +24,6 @@ salt2 = "a79f3ab9732cb999afec457267e49fea"
 # END CHANGEME.
 
 # SOME CONSTANTS
-FILE_NAME_LENGTH = 16 # number of bytes of randomness for file names
 BLOCK_SIZE = 16 # for AES128 
 MAC_SIZE = 20 # for HMAC-SHA1
 DURESS_TEXT = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed \
@@ -137,7 +136,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         ciphertext = aes.encrypt(plain)
         ciphertext = iv + ciphertext
         # generate a hmac tag
-        hmac=HMAC.new(mac_key,ciphertext,Crypto.Hash.SHA)
+        hmac = HMAC.new(mac_key,ciphertext,Crypto.Hash.SHA)
         ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext.encode("base64"))
 
@@ -177,14 +176,14 @@ def create_url():
   
     Encode into a 70-byte URI.
     """
-    uri_rand=Random.new().read(52) 
-    fname = base64.urlsafe_b64encode(uri_rand[:16])[:22]
-    key = uri_rand[16:32] # 16 bytes for AES key
-    mac_key = uri_rand[32:] # 20 bytes for HMAC
+    uri = Random.new().read(52) 
+    fname = base64.urlsafe_b64encode(uri[:16])[:22]
+    key = uri[16:32] # 16 bytes for AES key
+    mac_key = uri[32:] # 20 bytes for HMAC
     if os.path.exists('%s/data/%s' % (here, fname)):
         create_url()
     # remove the last 2 "==" from the url
-    new_url = base64.urlsafe_b64encode(uri_rand)[:70]
+    new_url = base64.urlsafe_b64encode(uri)[:70]
     return {"new_url": new_url, "key": key, "mac_key": mac_key, "fname": fname}
 
 def decode_url(url):
@@ -193,10 +192,10 @@ def decode_url(url):
     """
     # add the padding back
     url = url + "=="
-    uri_rand = base64.urlsafe_b64decode(url.encode("utf-8"))
-    fname = base64.urlsafe_b64encode(uri_rand[:16])[:22]
-    key = uri_rand[16:32] # 16 bytes for AES key
-    mac_key = uri_rand[32:] # 20 bytes for HMAC
+    uri = base64.urlsafe_b64decode(url.encode("utf-8"))
+    fname = base64.urlsafe_b64encode(uri[:16])[:22]
+    key = uri[16:32] # 16 bytes for AES key
+    mac_key = uri[32:] # 20 bytes for HMAC
     return {"key": key, "mac_key": mac_key, "fname":fname}
 
 @dnote.route('/', methods = ['GET'])
@@ -204,7 +203,7 @@ def index():
     """Return the index.html for the main application."""
     error = None
     new_url = create_url()["new_url"]
-    return render_template('index.html', random = new_url, error=error)
+    return render_template('index.html', random = new_url, error = error)
 
 @dnote.route('/security/', methods = ['GET'])
 def security():
@@ -230,7 +229,7 @@ def show_post(new_url):
     if a user provided string is used for key generation
     use PBKDF2 to generate secure keys from it.
     """
-    url_data=decode_url(new_url)
+    url_data = decode_url(new_url)
     key = url_data["key"]
     mac_key = url_data["mac_key"]
     fname = url_data["fname"]
@@ -245,18 +244,18 @@ def show_post(new_url):
             mac_key = PBKDF2(passphrase, salt2.decode("hex")).read(20)
             key_file = True
             note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random=new_url, passphrase=passphrase, duress=dkey)
+            return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
         elif request.form['pass'] and valid_token:
             passphrase = request.form['pass']
             key = PBKDF2(passphrase, salt1.decode("hex")).read(16)
             mac_key = PBKDF2(passphrase, salt2.decode("hex")).read(20)
             key_file = True
             note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random=new_url, passphrase=passphrase)
+            return render_template('post.html', random = new_url, passphrase = passphrase)
         elif not request.form['pass'] and valid_token:
             key_file = False
             note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random=new_url)
+            return render_template('post.html', random = new_url)
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
@@ -265,7 +264,7 @@ def fetch_url(random_url):
     Keyword arguments:
     random_url -- Random URL representing the encrypted note.
     """
-    url_data=decode_url(random_url)
+    url_data = decode_url(random_url)
     key = url_data["key"]
     mac_key = url_data["mac_key"]
     fname = url_data["fname"]
@@ -290,7 +289,7 @@ def fetch_url(random_url):
                     try:
                         hmac_check,plaintext = note_decrypt(key, mac_key, fname)
                         if hmac_check != 0 :
-                            return render_template('keyerror.html', random=random_url)
+                            return render_template('keyerror.html', random = random_url)
                         else: 
                             secure_remove('%s/data/%s' % (here, fname))
                             secure_remove('%s/data/%s.key' % (here, fname))
@@ -298,12 +297,12 @@ def fetch_url(random_url):
                                 secure_remove('%s/data/%s.dkey' % (here, fname))
                             return render_template('note.html', text = plaintext)
                     except:
-                        return render_template('keyerror.html', random=random_url)
+                        return render_template('keyerror.html', random = random_url)
         else:
             try:
                 hmac_check,plaintext = note_decrypt(key, mac_key, fname)
                 if hmac_check != 0 :
-                    return render_template('keyerror.html', random=random_url)
+                    return render_template('keyerror.html', random = random_url)
                 else: 
                     secure_remove('%s/data/%s' % (here, fname))
                     secure_remove('%s/data/%s.key' % (here, fname))
@@ -311,7 +310,7 @@ def fetch_url(random_url):
                         secure_remove('%s/data/%s.dkey' % (here, fname))
                     return render_template('note.html', text = plaintext)
             except:
-                return render_template('keyerror.html', random=random_url)
+                return render_template('keyerror.html', random = random_url)
     else:
         hmac_check,plaintext = note_decrypt(key, mac_key, fname)
         if hmac_check != 0 :
