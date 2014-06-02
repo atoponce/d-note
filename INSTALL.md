@@ -3,7 +3,7 @@ Installation
 
 d-note is a Python Flask web application that requires a couple of libraries to
 be installed. I'll assume you're using Debian to install software. First,
-install both `python-flask` and `python-crypto`:
+install `python-flask`, `python-pbkdf2`, and `python-crypto`:
 
     # apt-get install python-flask python-crypto
 
@@ -11,6 +11,7 @@ Now make a directory under your web root to clone the Git repository:
 
     # mkdir /var/www/dnote/
     # git clone https://github.com/atoponce/d-note.git /var/www/dnote/dnote
+    # mkdir /var/www/dnote/dnote/data/
 
 Apache Setup
 ------------
