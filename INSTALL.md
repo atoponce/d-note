@@ -5,7 +5,7 @@ d-note is a Python Flask web application that requires a couple of libraries to
 be installed. I&#39;ll assume you&#39;re using Debian to install software. First,
 install `python-flask`, `python-pbkdf2`, and `python-crypto`:
 
-    # apt-get install python-flask python-crypto
+    # apt-get install python-flask python-crypto python-pbkdf2
 
 Now make a directory under your web root to clone the Git repository:
 
