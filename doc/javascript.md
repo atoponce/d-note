@@ -77,4 +77,4 @@ produce a fingerprint that represents your browser. The hash is MurmurHash3 with
 a 32-bit output.
 
 The fingerprint.js code is copyright Valentin Vasilyev, and can be found
-upstream at [his Github page](https://github.com/Valve/fingerprints).
+upstream at [his Github page](https://github.com/Valve/fingerprintjs).
