@@ -26,21 +26,21 @@ The filename is encoded using `base64.urlsafe_b64encode(uri_rand)[:22]`. This
 gives us the first 22 characters of our random URI for our filename.
 
 The note is encrypted with AES. The encryption key is created using
-`uri_rand[16:32]`. However, if the user supplies a password in the form, then
-the AES encryption key is created with
+`uri_rand[16:32]`. This key gives us the next 22 characters in our base64 URL.
+However, if the user supplies a password in the form, then the URL AES key is
+ignored, and the AES encryption key is created with
 `PBKDF2(passphrase,salt1.decode("hex")).read(16)`, where `salt1` is a random
 static string as part of the installation. Should the encrypted note land into
 the wrong hands, PBKDF greatly reduces the speed at which a brute force attack
-can be mounted against the encrypted text looking for the password. This key
-gives us the next 22 characters in our base64 URL.
+can be mounted against the encrypted text looking for the password.
 
 Finally, the encrypted note is protected with message authentication using
 HMAC-SHA1. This ensures data integrity, both reading the encrypted data from
 disk, as well as ensuring all bits are in place on the wire. The MAC key is
-created with `uri_rand[32:]` by default, unless a user supplies a form password.
-If a password is supplied, then the MAC key is created with
-`PBKDF2(passphrase,salt2.decode("hex")).read(20)`, for the same reasons as
-above. This gives us the last 26 characters of our URL.
+created with `uri_rand[32:]`, which gives us the last 26 characters in our URL.
+If a form password is supplied, then the URL HMAC key is ignored, and the MAC
+key is created with `PBKDF2(passphrase,salt2.decode("hex")).read(20)`, for the
+same reasons as above.
 
 The valid characters for our URLs are as follows:
 
