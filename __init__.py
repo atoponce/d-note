@@ -68,7 +68,7 @@ def duress_key(random_url):
         f.write(dkey)
     return dkey
 
-def zen():
+def duress_text():
     """Return 5 random sentences of the Zen of Python."""
     import subprocess
     text = ''
@@ -291,8 +291,7 @@ def fetch_url(random_url):
                     secure_remove('%s/data/%s' % (here, fname))
                     secure_remove('%s/data/%s.key' % (here, fname))
                     secure_remove('%s/data/%s.dkey' % (here, fname))
-                    # return render_template('404.html'), 404
-                    return render_template('note.html', text = zen())
+                    return render_template('note.html', text = duress_text())
                 else:
                     try:
                         hmac_check,plaintext = note_decrypt(key, mac_key, fname)
