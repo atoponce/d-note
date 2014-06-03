@@ -33,9 +33,8 @@
         onclick="document.getElementById('passphrase').value = make_key()">
         <br/>
         <input type="checkbox" id="duress" name="duress">Add a duress key.
-        <span class="tooltip" title="A  key that you provide to someone that is
-        demanding decryption of the note. Except, this key will immediately
-        destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
+        <!-- do not wrap at 80-characters. the hover text breaks -->
+        <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
         <br/>
         <input type="hidden" id="hashcash" name="hashcash">
         <input type="submit" id="submit" value="Submit">
