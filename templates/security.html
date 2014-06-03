@@ -20,20 +20,19 @@
         <p class="title">AES Encrypted with HMAC-SHA1</p>
         <p class="desc">Before storing the note on disk, every note is
         compressed with ZLIB, then encrypted with AES in CBC mode using
-        HMAC-SHA1 encryption. The HMAC-SHA1 key is never stored on disk and is
-        part of the URL.</p>
+        HMAC-SHA1 encryption. The AES and HMAC-SHA1 keys are never stored on 
+        disk and are part of the URL.</p>
     </div>
     <div class="section">
-        <p class="title">Private Passwords</p>
-        <p class="desc">The application uses a default password that is stored
-        in the URL and is part of  the encryption and decryption of all the notes. However, the
-        application supports using custom passwords to encrypt and decrypt the
-        note. This custom password is created using a password-based key
-        derivation function, which in turn is also stored in the URL. Even
-        though the private password is not stored to disk by default in the
-        application, this does not prevent the system administrator from
-        modifying the code to do so. Therefore, it is best that you host this
-        application yourself, on your own server.</p>
+        <p class="title">Private Passphrase</p>
+        <p class="desc">The application uses a per note random key that is 
+        stored in the URL and is part of the encryption and decryption of the
+        notes. The application supports using a custom passphrase to encrypt and 
+        decrypt the note. This custom passphrase is created using a 
+        password-based key derivation function. The private passphrase is not 
+        stored to disk in the application, but this does not prevent the system
+        administrator from modifying the code to do so. Therefore, it is best 
+        that you host this application yourself, on your own server.</p>
     </div>
     <div class="section">
         <p class="title">Hashcash Protected</p>

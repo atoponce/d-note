@@ -3,7 +3,7 @@ Installation
 
 d-note is a Python Flask web application that requires a couple of libraries to
 be installed. I'll assume you're using Debian to install software. First,
-install both `python-flask` and `python-crypto`:
+install `python-flask`, `python-pbkdf2`, and `python-crypto`:
 
     # apt-get install python-flask python-crypto
 
@@ -11,7 +11,10 @@ Now make a directory under your web root to clone the Git repository:
 
     # mkdir /var/www/dnote/
     # git clone https://github.com/atoponce/d-note.git /var/www/dnote/dnote
+    # mkdir /var/www/dnote/dnote/data/
 
+Apache Setup
+------------
 Install `libapache2-mod-wsgi` to server the Python Flask web framework under
 Apache:
 
@@ -64,3 +67,56 @@ necessary.
 Restart Apache, and verify that the site loads:
 
     # service apache2 restart
+
+Nginx Setup
+-----------
+Install uwsgi:
+
+    # apt-get install uwsgi uwsgi-core uwsgi-extra uwsgi-plugin-python
+    
+Create a uwsgi.ini file in the directory with the application:
+
+    # touch /var/www/dnote/dnote/uwsgi.ini
+    
+And add the following to that file (you can tweak these settings as required):
+
+    [uwsgi]
+    socket = /tmp/dnote.sock
+    chdir = /var/www/dnote/dnote
+    plugin = python
+    module = __init__:dnote
+    processes = 4
+    threads = 2
+    stats = 127.0.0.1:9192
+    uid = www-data
+    gid = www-data
+    logto = /var/log/dnote.log
+    
+You can now start the dnote application by running: 
+
+    # /usr/bin/uwsgi -c /var/www/dnote/dnote/uwsgi.ini
+    
+You may want to add this to an init or upstart script, see:
+http://uwsgi-docs.readthedocs.org/en/latest/Management.html
+    
+Now lets configure nginx. A common example would be if you wanted it 
+to be avaliable under http://yoursite.tld/dnote. To acheive this, add
+the following to your sites config (again, you can tweak thsi as needed):
+
+    location = /dnote { rewrite ^ /dnote/; }
+    location /dnote/ { try_files $uri @dnote; }
+    location @dnote {
+        include uwsgi_params;
+        uwsgi_param SCRIPT_NAME /dnote;
+        uwsgi_modifier1 30;
+        uwsgi_pass unix:/tmp/dnote.sock;
+    }
+
+And tada, restart the Nginx server and you should have a working dnote setup.
+
+
+Troubleshooting
+---------------
+If you are getting any internal service errors make sure to verify that the
+files in /var/www/dnote/dnote are readable by the webserver, and that
+/var/www/dnote/dnote/data/hashcash.db is writable as well.

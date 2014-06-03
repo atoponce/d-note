@@ -1,19 +1,13 @@
 import base64
-import email.utils
 import os
 import pbkdf2
-import smtplib
-import string
-import time
 import zlib
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA
 from Crypto.Random import random
-from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for
-from threading import Thread
 
 # BEGIN CHANGEME.
 fromaddr = "no-reply@example.com"
@@ -34,6 +28,10 @@ if not os.path.exists('%s/data/' % here):
 
 def send_email(link, recipient):
     """Send the link via email to a recipient."""
+    import email.utils
+    import smtplib
+    import time
+    from email.mime.text import MIMEText
     msg = MIMEText("%s" % link)
     msg['To'] = email.utils.formataddr(('Self Destructing Notes', recipient))
     msg['From'] = email.utils.formataddr((fullname, fromaddr))
@@ -43,6 +41,7 @@ def send_email(link, recipient):
     
 def async(func):
     """Return threaded wrapper decorator."""
+    from threading import Thread
     def wrapper(*args, **kwargs):
         t = Thread(target = func, args = args, kwargs = kwargs)
         t.start()
@@ -62,6 +61,7 @@ def cleanup_unread():
 def duress_key(random_url):
     """Return a duress key for Big Brother. The duress key is stored on disk in
     plaintext, and only returns lorem ipsum text."""
+    import string
     chars = string.ascii_letters + string.digits
     dkey = ''.join(Random.random.choice(chars) for i in xrange(24))
     with open('%s/data/%s.dkey' % (here,random_url), 'w') as f:
@@ -108,7 +108,7 @@ def verify_hashcash(token):
     """
     digest = SHA.new(token)
     with open('%s/data/hashcash.db' % here, 'a+') as f:
-        if digest.hexdigest()[:4] == '0000' and digest not in f:
+        if digest.hexdigest()[:4] == '0000' and token not in f.read():
             f.write(token+'\n')
             return True
         else:
@@ -184,7 +184,7 @@ def create_url():
     key = uri[16:32] # 16 bytes for AES key
     mac_key = uri[32:] # 20 bytes for HMAC
     if os.path.exists('%s/data/%s' % (here, fname)):
-        create_url()
+        return create_url()
     # remove the last 2 "==" from the url
     new_url = base64.urlsafe_b64encode(uri)[:70]
     return {"new_url": new_url, "key": key, "mac_key": mac_key, "fname": fname}
@@ -204,7 +204,7 @@ def decode_url(url):
 @dnote.route('/', methods = ['GET'])
 def index():
     """Return the index.html for the main application."""
-    error = None
+    error = request.args.get('error',None)
     new_url = create_url()["new_url"]
     return render_template('index.html', random = new_url, error = error)
 
@@ -223,7 +223,7 @@ def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
 
-@dnote.route('/post/<new_url>', methods = ['POST', 'GET'])
+@dnote.route('/post/<new_url>', methods = ['POST'])
 def show_post(new_url):
     """Return the random URL after posting the plaintext.
     
@@ -236,29 +236,34 @@ def show_post(new_url):
     key = url_data["key"]
     mac_key = url_data["mac_key"]
     fname = url_data["fname"]
-    if request.method == 'POST':
-        plaintext = request.form['paste']
-        token = request.form['hashcash']
-        valid_token = verify_hashcash(token)
-        if request.form.get('duress', False) and request.form['pass'] and valid_token:
-            dkey = duress_key(fname)
-            passphrase = request.form['pass']
-            key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
-            mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
-            key_file = True
-            note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
-        elif request.form['pass'] and valid_token:
-            passphrase = request.form['pass']
-            key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
-            mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
-            key_file = True
-            note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random = new_url, passphrase = passphrase)
-        elif not request.form['pass'] and valid_token:
-            key_file = False
-            note_encrypt(key, mac_key, plaintext, fname, key_file)
-            return render_template('post.html', random = new_url)
+
+    plaintext = request.form['paste']
+    passphrase = request.form.get('pass',False)
+    duress = request.form.get('duress',False)
+    token = request.form['hashcash']
+
+    if not verify_hashcash(token):
+        return redirect(url_for('index',error='hashcash'))
+    if duress and not passphrase:
+        return redirect(url_for('index',error='duress'))
+
+    if duress and passphrase:
+        dkey = duress_key(fname)
+        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key_file = True
+        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
+    elif passphrase:
+        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key_file = True
+        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        return render_template('post.html', random = new_url, passphrase = passphrase)
+    else:
+        key_file = False
+        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        return render_template('post.html', random = new_url)
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
@@ -324,5 +329,5 @@ def fetch_url(random_url):
 
 if __name__ == '__main__':
     dnote.debug = True
-    cleanup_unread()
+    #cleanup_unread()
     dnote.run()
