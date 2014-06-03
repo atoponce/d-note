@@ -2,7 +2,7 @@ Installation
 ============
 
 d-note is a Python Flask web application that requires a couple of libraries to
-be installed. I'll assume you're using Debian to install software. First,
+be installed. I&#39;ll assume you&#39;re using Debian to install software. First,
 install `python-flask`, `python-pbkdf2`, and `python-crypto`:
 
     # apt-get install python-flask python-crypto
@@ -34,8 +34,8 @@ Add the following contents to that file:
     from dnote import dnote as application
  
 Now configure Apache to server the application. Create
-`/etc/apache2/site-available/` with the following contents. It's important that
-you serve the application over SSL. See additional Apache documentation as
+`/etc/apache2/site-available/` with the following contents. It&#39;s important
+that you serve the application over SSL. See additional Apache documentation as
 necessary.
 
     <Virtualhost *:443>
