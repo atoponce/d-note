@@ -179,8 +179,8 @@ def create_url():
     uri = Random.new().read(16)
     uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
-    key = uri_data[16:48] # 16 bytes for AES key
-    mac_key = uri_data[48:] # 20 bytes for HMAC
+    key = uri_data[16:48] # 32 bytes for AES key
+    mac_key = uri_data[48:] # 64 bytes for HMAC
     if os.path.exists('%s/data/%s' % (here, fname)):
         return create_url()
     # remove the last 2 "==" from the url
@@ -196,8 +196,8 @@ def decode_url(url):
     uri = base64.urlsafe_b64decode(url.encode("utf-8"))
     uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
-    key = uri_data[16:48] # 16 bytes for AES key
-    mac_key = uri_data[48:] # 20 bytes for HMAC
+    key = uri_data[16:48] # 32 bytes for AES key
+    mac_key = uri_data[48:] # 64 bytes for HMAC
     return {"key": key, "mac_key": mac_key, "fname":fname}
 
 @dnote.route('/', methods = ['GET'])
