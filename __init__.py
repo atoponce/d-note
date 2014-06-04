@@ -190,6 +190,9 @@ def create_url():
 def decode_url(url):
     """
     Takes a url, and returns the fname, key, hmac_key out of it
+
+    keyword arguments:
+    url -- the url after the FQDN provided by the client
     """
     # add the padding back
     url = url + "=="
@@ -224,13 +227,7 @@ def about():
 
 @dnote.route('/post', methods = ['POST'])
 def show_post():
-    """Return the random URL after posting the plaintext.
-
-    Keyword arguments:
-    new_url -- encrypted file representing the unique URL
-    if a user provided string is used for key generation
-    use PBKDF2 to generate secure keys from it.
-    """
+    """Return the random URL after posting the plaintext."""
     new_url = request.form["new_url"]
     url_data = decode_url(new_url)
     key = url_data["key"]
