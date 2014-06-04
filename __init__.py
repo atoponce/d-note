@@ -13,9 +13,11 @@ from flask import Flask, render_template, request, redirect, url_for
 # BEGIN CHANGEME.
 fromaddr = "no-reply@example.com"
 fullname = "John Doe"
-salt1 = "52f9a7242412eed8d607f80a4a97d41b" # Random.new().read(16).encode("hex")
-salt2 = "a79f3ab9732cb999afec457267e49fea"
-salt3 = "deadbeefbad1eadeadbeefbad1dea000"
+
+# Random.new().read(16).encode("hex")
+uri_salt = "673ed3e56944c392d408b3976e18abc4"
+aes_salt = "52f9a7242412eed8d607f80a4a97d41b"
+mac_salt = "a79f3ab9732cb999afec457267e49fea"
 # END CHANGEME.
 
 dnote = Flask(__name__)
@@ -126,7 +128,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     fname -- file to save the encrypted text to.
     """
     pad = lambda s: s + (32 - len(s) % 32) * chr(32 - len(s) % 32)
-    plain = pad(plaintext.encode('utf-8'))
+    plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
@@ -138,7 +140,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         ciphertext = iv + ciphertext
         # generate a hmac tag
         hmac = HMAC.new(mac_key,ciphertext,SHA512)
-        ciphertext = zlib.compress(hmac.digest() + ciphertext)
+        ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext.encode("base64"))
 
 def note_decrypt(key, mac_key, fname):
@@ -153,7 +155,7 @@ def note_decrypt(key, mac_key, fname):
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
-    message = zlib.decompress(message.decode("base64"))
+    message = (message.decode("base64"))
     tag = message[:64]
     data = message[64:]
     iv = data[:16]
@@ -166,7 +168,7 @@ def note_decrypt(key, mac_key, fname):
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
-    return hmac_check,unpad(plaintext).decode('utf-8')
+    return hmac_check,zlib.decompress(unpad(plaintext)).decode('utf-8')
 
 def create_url():
     """Generate enough randomness for filename, AES key, MAC key:
@@ -178,7 +180,7 @@ def create_url():
     Encode into a 22-byte URI.
     """
     uri = Random.new().read(16)
-    uri_data=pbkdf2.PBKDF2(uri,salt3.decode("hex")).read(112)
+    uri_data=pbkdf2.PBKDF2(uri,uri_salt.decode("hex")).read(112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
     key = uri_data[16:48] # 16 bytes for AES key
     mac_key = uri_data[48:] # 20 bytes for HMAC
@@ -195,7 +197,7 @@ def decode_url(url):
     # add the padding back
     url = url + "=="
     uri = base64.urlsafe_b64decode(url.encode("utf-8"))
-    uri_data=pbkdf2.PBKDF2(uri,salt3.decode("hex")).read(112)
+    uri_data=pbkdf2.PBKDF2(uri,uri_salt.decode("hex")).read(112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
     key = uri_data[16:48] # 16 bytes for AES key
     mac_key = uri_data[48:] # 20 bytes for HMAC
@@ -250,14 +252,14 @@ def show_post():
 
     if duress and passphrase:
         dkey = duress_key(fname)
-        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
-        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key = pbkdf2.PBKDF2(passphrase, aes_salt.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, mac_salt.decode("hex")).read(20)
         key_file = True
         note_encrypt(key, mac_key, plaintext, fname, key_file)
         return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
     elif passphrase:
-        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
-        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key = pbkdf2.PBKDF2(passphrase, aes_salt.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, mac_salt.decode("hex")).read(20)
         key_file = True
         note_encrypt(key, mac_key, plaintext, fname, key_file)
         return render_template('post.html', random = new_url, passphrase = passphrase)
@@ -284,8 +286,8 @@ def fetch_url(random_url):
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,fname)) and request.method == 'POST':
         passphrase = request.form['pass']
-        key = pbkdf2.PBKDF2(passphrase, salt1.decode("hex")).read(16)
-        mac_key = pbkdf2.PBKDF2(passphrase, salt2.decode("hex")).read(20)
+        key = pbkdf2.PBKDF2(passphrase, aes_salt.decode("hex")).read(16)
+        mac_key = pbkdf2.PBKDF2(passphrase, mac_salt.decode("hex")).read(20)
         if os.path.exists('%s/data/%s.dkey' % (here,fname)):
             with open('%s/data/%s.dkey' % (here,fname), 'r') as f:
                 if passphrase in f:
