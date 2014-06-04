@@ -1,3 +1,4 @@
+import dconfig
 import base64
 import os
 import zlib
@@ -7,16 +8,6 @@ from Crypto.Hash import HMAC, SHA, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Random import random
 from flask import Flask, render_template, request, redirect, url_for
-
-# BEGIN CHANGEME.
-fromaddr = "no-reply@example.com"
-fullname = "John Doe"
-
-# Random.new().read(16).encode("hex")
-uri_salt = "673ed3e56944c392d408b3976e18abc4"
-aes_salt = "52f9a7242412eed8d607f80a4a97d41b"
-mac_salt = "a79f3ab9732cb999afec457267e49fea"
-# END CHANGEME.
 
 dnote = Flask(__name__)
 here = dnote.root_path
@@ -178,7 +169,7 @@ def create_url():
     Encode into a 22-byte URI.
     """
     uri = Random.new().read(16)
-    uri_data = KDF.PBKDF2(uri,uri_salt.decode("hex"),112)
+    uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
     key = uri_data[16:48] # 16 bytes for AES key
     mac_key = uri_data[48:] # 20 bytes for HMAC
@@ -195,7 +186,7 @@ def decode_url(url):
     # add the padding back
     url = url + "=="
     uri = base64.urlsafe_b64decode(url.encode("utf-8"))
-    uri_data = KDF.PBKDF2(uri,uri_salt.decode("hex"),112)
+    uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
     fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
     key = uri_data[16:48] # 16 bytes for AES key
     mac_key = uri_data[48:] # 20 bytes for HMAC
@@ -250,14 +241,14 @@ def show_post():
 
     if duress and passphrase:
         dkey = duress_key(fname)
-        key = KDF.PBKDF2(passphrase, aes_salt.decode("hex"), 32)
-        mac_key = KDF.PBKDF2(passphrase, mac_salt.decode("hex"), 64)
+        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
+        mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         key_file = True
         note_encrypt(key, mac_key, plaintext, fname, key_file)
         return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
     elif passphrase:
-        key = KDF.PBKDF2(passphrase, aes_salt.decode("hex"), 32)
-        mac_key = KDF.PBKDF2(passphrase, mac_salt.decode("hex"), 64)
+        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
+        mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         key_file = True
         note_encrypt(key, mac_key, plaintext, fname, key_file)
         return render_template('post.html', random = new_url, passphrase = passphrase)
@@ -284,8 +275,8 @@ def fetch_url(random_url):
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,fname)) and request.method == 'POST':
         passphrase = request.form['pass']
-        key = KDF.PBKDF2(passphrase, aes_salt.decode("hex"), 32)
-        mac_key = KDF.PBKDF2(passphrase, mac_salt.decode("hex"), 64)
+        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
+        mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         if os.path.exists('%s/data/%s.dkey' % (here,fname)):
             with open('%s/data/%s.dkey' % (here,fname), 'r') as f:
                 if passphrase in f:
