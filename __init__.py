@@ -6,6 +6,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA
+from Crypto.Hash import SHA512
 from Crypto.Random import random
 from flask import Flask, render_template, request, redirect, url_for
 
@@ -14,11 +15,8 @@ fromaddr = "no-reply@example.com"
 fullname = "John Doe"
 salt1 = "52f9a7242412eed8d607f80a4a97d41b" # Random.new().read(16).encode("hex")
 salt2 = "a79f3ab9732cb999afec457267e49fea"
+salt3 = "deadbeefbad1eadeadbeefbad1dea000"
 # END CHANGEME.
-
-# SOME CONSTANTS
-BLOCK_SIZE = 16 # for AES128 
-MAC_SIZE = 20 # for HMAC-SHA1
 
 dnote = Flask(__name__)
 here = dnote.root_path
@@ -38,7 +36,7 @@ def send_email(link, recipient):
     s = smtplib.SMTP('localhost')
     s.sendmail(fromaddr, [recipient], msg.as_string())
     s.quit()
-    
+
 def async(func):
     """Return threaded wrapper decorator."""
     from threading import Thread
@@ -117,7 +115,7 @@ def verify_hashcash(token):
 def note_encrypt(key, mac_key, plaintext, fname, key_file):
     """Encrypt a plaintext to a URI file.
 
-    All files are encrypted with AES in CBC mode. HMAC-SHA1 is used
+    All files are encrypted with AES in CBC mode. HMAC-SHA512 is used
     to provide authenticated encryption ( encrypt then mac ). No private keys
     are stored on the server.
 
@@ -127,19 +125,19 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     plaintext -- the message to be encrypted.
     fname -- file to save the encrypted text to.
     """
-    pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
+    pad = lambda s: s + (32 - len(s) % 32) * chr(32 - len(s) % 32)
     plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
-        iv = Random.new().read(BLOCK_SIZE)
+        iv = Random.new().read(16)
         aes = AES.new(key, AES.MODE_CBC, iv)
         ciphertext = aes.encrypt(plain)
         ciphertext = iv + ciphertext
         # generate a hmac tag
-        hmac = HMAC.new(mac_key,ciphertext,SHA)
+        hmac = HMAC.new(mac_key,ciphertext,SHA512)
         ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext.encode("base64"))
 
@@ -151,20 +149,20 @@ def note_decrypt(key, mac_key, fname):
     hmac_key -- hmac-sha1 key for authenticated encryption
     fname -- filename containing the message to be decrypted
     """
-    
+
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
     message = message.decode("base64")
-    tag = message[:MAC_SIZE]
-    data = message[MAC_SIZE:]
-    iv = data[:BLOCK_SIZE]
-    body = data[BLOCK_SIZE:]
+    tag = message[:64]
+    data = message[64:]
+    iv = data[:16]
+    body = data[16:]
     aes = AES.new(key, AES.MODE_CBC,iv)
     plaintext = aes.decrypt(body)
-    # check the message tags, return 0 if is good 
+    # check the message tags, return 0 if is good
     # constant time comparison
-    tag2 = HMAC.new(mac_key,data,SHA).digest()
+    tag2 = HMAC.new(mac_key,data,SHA512).digest()
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
@@ -172,33 +170,35 @@ def note_decrypt(key, mac_key, fname):
 
 def create_url():
     """Generate enough randomness for filename, AES key, MAC key:
-     
+
         - 128 bits for file name
-        - 128 bits for AES-128 key
-        - 160 bits for HMAC-SHA1 key      
-  
-    Encode into a 70-byte URI.
+        - 256 bits for AES-256 key
+        - 512 bits for HMAC-SHA512 key
+
+    Encode into a 22-byte URI.
     """
-    uri = Random.new().read(52) 
-    fname = base64.urlsafe_b64encode(uri[:16])[:22]
-    key = uri[16:32] # 16 bytes for AES key
-    mac_key = uri[32:] # 20 bytes for HMAC
+    uri = Random.new().read(16)
+    uri_data=pbkdf2.PBKDF2(uri,salt3.decode("hex")).read(112)
+    fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
+    key = uri_data[16:48] # 16 bytes for AES key
+    mac_key = uri_data[48:] # 20 bytes for HMAC
     if os.path.exists('%s/data/%s' % (here, fname)):
         return create_url()
     # remove the last 2 "==" from the url
-    new_url = base64.urlsafe_b64encode(uri)[:70]
+    new_url = base64.urlsafe_b64encode(uri)[:22]
     return {"new_url": new_url, "key": key, "mac_key": mac_key, "fname": fname}
 
 def decode_url(url):
-    """ 
+    """
     Takes a url, and returns the fname, key, hmac_key out of it
     """
     # add the padding back
     url = url + "=="
     uri = base64.urlsafe_b64decode(url.encode("utf-8"))
-    fname = base64.urlsafe_b64encode(uri[:16])[:22]
-    key = uri[16:32] # 16 bytes for AES key
-    mac_key = uri[32:] # 20 bytes for HMAC
+    uri_data=pbkdf2.PBKDF2(uri,salt3.decode("hex")).read(112)
+    fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
+    key = uri_data[16:48] # 16 bytes for AES key
+    mac_key = uri_data[48:] # 20 bytes for HMAC
     return {"key": key, "mac_key": mac_key, "fname":fname}
 
 @dnote.route('/', methods = ['GET'])
@@ -223,10 +223,10 @@ def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
 
-@dnote.route('/post/', methods = ['POST'])
+@dnote.route('/post', methods = ['POST'])
 def show_post():
     """Return the random URL after posting the plaintext.
-    
+
     Keyword arguments:
     new_url -- encrypted file representing the unique URL
     if a user provided string is used for key generation
@@ -269,7 +269,7 @@ def show_post():
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
 def fetch_url(random_url):
     """Return the decrypted note. Begin short destruction timer.
-    
+
     Keyword arguments:
     random_url -- Random URL representing the encrypted note.
     """
@@ -298,7 +298,7 @@ def fetch_url(random_url):
                         hmac_check,plaintext = note_decrypt(key, mac_key, fname)
                         if hmac_check != 0 :
                             return render_template('keyerror.html', random = random_url)
-                        else: 
+                        else:
                             secure_remove('%s/data/%s' % (here, fname))
                             secure_remove('%s/data/%s.key' % (here, fname))
                             if os.path.exists('%s/data/%s.dkey' % (here, fname)):
@@ -311,7 +311,7 @@ def fetch_url(random_url):
                 hmac_check,plaintext = note_decrypt(key, mac_key, fname)
                 if hmac_check != 0 :
                     return render_template('keyerror.html', random = random_url)
-                else: 
+                else:
                     secure_remove('%s/data/%s' % (here, fname))
                     secure_remove('%s/data/%s.key' % (here, fname))
                     if os.path.exists('%s/data/%s.dkey' % (here, fname)):
