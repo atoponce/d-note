@@ -126,7 +126,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     fname -- file to save the encrypted text to.
     """
     pad = lambda s: s + (32 - len(s) % 32) * chr(32 - len(s) % 32)
-    plain = pad(zlib.compress(plaintext.encode('utf-8')))
+    plain = pad(plaintext.encode('utf-8'))
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
@@ -138,7 +138,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         ciphertext = iv + ciphertext
         # generate a hmac tag
         hmac = HMAC.new(mac_key,ciphertext,SHA512)
-        ciphertext = hmac.digest() + ciphertext
+        ciphertext = zlib.compress(hmac.digest() + ciphertext)
         f.write(ciphertext.encode("base64"))
 
 def note_decrypt(key, mac_key, fname):
@@ -153,7 +153,7 @@ def note_decrypt(key, mac_key, fname):
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
-    message = message.decode("base64")
+    message = zlib.decompress(message.decode("base64"))
     tag = message[:64]
     data = message[64:]
     iv = data[:16]
@@ -166,7 +166,7 @@ def note_decrypt(key, mac_key, fname):
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
-    return hmac_check,zlib.decompress(unpad(plaintext)).decode('utf-8')
+    return hmac_check,unpad(plaintext).decode('utf-8')
 
 def create_url():
     """Generate enough randomness for filename, AES key, MAC key:
