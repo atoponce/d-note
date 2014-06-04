@@ -1,4 +1,5 @@
 data/*
+dconfig.py
 *.pyc
 *.swp
 .*.swp
