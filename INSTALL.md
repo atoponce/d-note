@@ -9,9 +9,11 @@ install `python-flask`, `python-pbkdf2`, and `python-crypto`:
 
 Now make a directory under your web root to clone the Git repository:
 
-    # mkdir /var/www/dnote/
-    # git clone https://github.com/atoponce/d-note.git /var/www/dnote/dnote
-    # mkdir /var/www/dnote/dnote/data/
+    # mkdir /var/www/
+    # git clone https://github.com/atoponce/d-note.git /var/www/dnote
+    # mkdir /var/www/dnote/data/
+    # chown root.www-data /var/www/dnote/data
+    # chmod g+w,o= root.www-data /var/www/data/dnote/data
 
 Apache Setup
 ------------
@@ -22,7 +24,7 @@ Apache:
 
 Create a `dnote.wsgi` file under the web root:
 
-    # touch /var/www/dnote/dnote.wsgi
+    # touch /var/www/dnote.wsgi
 
 Add the following contents to that file:
 
@@ -39,21 +41,21 @@ that you serve the application over SSL. See additional Apache documentation as
 necessary.
 
     <Virtualhost *:443>
-        DocumentRoot /var/www/dnote/
+        DocumentRoot /var/www/
         CustomLog /var/log/apache2/access.log combined
         ServerName www.example.com
         ServerAlias www.example.com example.com
         ServerAdmin webmaster@example.com
-        <Directory /var/www/dnote>
+        <Directory /var/www/>
             Options -Indexes FollowSymLinks
         </Directory>
-        WSGIScriptAlias / /var/www/dnote/dnote.wsgi
-        <Directory /var/www/dnote/dnote/>
+        WSGIScriptAlias / /var/www/dnote.wsgi
+        <Directory /var/www/dnote/
             Order allow,deny
             Allow from all
         </Directory>
-            Alias /d/static /var/www/dnote/dnote/static
-        <Directory /var/www/dnote/dnote/static/>
+            Alias /d/static /var/www/dnote/static
+        <Directory /var/www/dnote/static/>
             Order allow,deny
             Allow from all
         </Directory>
@@ -82,7 +84,7 @@ And add the following to that file (you can tweak these settings as required):
 
     [uwsgi]
     socket = /tmp/dnote.sock
-    chdir = /var/www/dnote/dnote
+    chdir = /var/www/dnote
     plugin = python
     module = __init__:dnote
     processes = 4
@@ -94,7 +96,7 @@ And add the following to that file (you can tweak these settings as required):
     
 You can now start the dnote application by running: 
 
-    # /usr/bin/uwsgi -c /var/www/dnote/dnote/uwsgi.ini
+    # /usr/bin/uwsgi -c /var/www/uwsgi.ini
     
 You may want to add this to an init or upstart script, see:
 http://uwsgi-docs.readthedocs.org/en/latest/Management.html
