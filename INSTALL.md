@@ -15,6 +15,16 @@ Now make a directory under your web root to clone the Git repository:
     # chown root.www-data /var/www/dnote/data
     # chmod g+w,o= root.www-data /var/www/data/dnote/data
 
+Configuration
+-------------
+Make sure you change the configuration found in /var/www/dnote/dnote.py as
+necessary. The three salts listed in that configuration should be changed. You
+can run the following Python code to generate those salts:
+
+    >>> from Crypto import Random
+    >>> for salt in range(3):
+    ...     print Random.new().read(16).encode(&#39;hex&#39;)
+
 Apache Setup
 ------------
 Install `libapache2-mod-wsgi` to server the Python Flask web framework under
