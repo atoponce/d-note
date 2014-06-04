@@ -4,9 +4,7 @@ import zlib
 from Crypto import Protocol
 from Crypto import Random
 from Crypto.Cipher import AES
-from Crypto.Hash import HMAC
-from Crypto.Hash import SHA
-from Crypto.Hash import SHA512
+from Crypto.Hash import HMAC, SHA, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Random import random
 from flask import Flask, render_template, request, redirect, url_for
