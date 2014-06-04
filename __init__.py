@@ -223,8 +223,8 @@ def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
 
-@dnote.route('/post/<new_url>', methods = ['POST'])
-def show_post(new_url):
+@dnote.route('/post/', methods = ['POST'])
+def show_post():
     """Return the random URL after posting the plaintext.
     
     Keyword arguments:
@@ -232,6 +232,7 @@ def show_post(new_url):
     if a user provided string is used for key generation
     use PBKDF2 to generate secure keys from it.
     """
+    new_url = request.form["new_url"]
     url_data = decode_url(new_url)
     key = url_data["key"]
     mac_key = url_data["mac_key"]
