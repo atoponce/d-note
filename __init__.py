@@ -131,7 +131,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         open('%s/data/%s.key' % (here, fname), 'a').close()
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
-        iv = Random.new().read(16)
+        iv = Random.new().read(AES.block_size) # Fixed block size to 16 bytes.
         aes = AES.new(key, AES.MODE_CBC, iv)
         ciphertext = aes.encrypt(plain)
         ciphertext = iv + ciphertext
