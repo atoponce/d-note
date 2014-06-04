@@ -1,7 +1,6 @@
 import base64
 import os
 import zlib
-from Crypto import Protocol
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC, SHA, SHA512
