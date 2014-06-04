@@ -1,4 +1,3 @@
-import dconfig
 import base64
 import os
 import zlib
@@ -8,6 +7,15 @@ from Crypto.Hash import HMAC, SHA, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Random import random
 from flask import Flask, render_template, request, redirect, url_for
+
+try:
+    import dconfig
+except ImportError:
+    with open('dconfig.py','w') as f:
+        f.write('uri_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
+        f.write('aes_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
+        f.write('mac_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
+    import dconfig
 
 dnote = Flask(__name__)
 here = dnote.root_path
