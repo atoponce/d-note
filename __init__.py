@@ -124,7 +124,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     plaintext -- the message to be encrypted.
     fname -- file to save the encrypted text to.
     """
-    pad = lambda s: s + (32 - len(s) % 32) * chr(32 - len(s) % 32)
+    pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(AES.block_size - len(s) % AES.block_size)
     plain = pad(zlib.compress(plaintext.encode('utf-8')))
     if key_file:
         # create empty file with '.key' as an extension
