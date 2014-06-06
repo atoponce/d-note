@@ -16,8 +16,8 @@ server.
 Read [the documentation](/doc) about further information regarding this
 project.
 
-This project is licensed under the GNU Affero General Public License, version 3.
-See [the license](LICENSE.md) for the complete license.
+This project is licensed under the GNU Affero General Public License, version 3,
+unless otherwise stated. See [the license](LICENSE.md) for the complete license.
 
 Demo
 ----
