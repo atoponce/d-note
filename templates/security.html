@@ -5,23 +5,24 @@
         <p class="title">Self Destruction</p>
         <p class="desc">Every note submitted to the server will eventually be
         destroyed. All unread notes are destroyed after 30 days. All notes that
-        have been viewed are destroyed 3 minutes after viewing. When the note is
-        destroyed, it is overwritten with random data. This application does not
-        make any assumptions about the underlying filesystem. Better safe than
-        sorry, we say.</p>
+        have been viewed are destroyed immediately after viewing, and the
+        browser will be redirected away from the note after 3 minutes. When the
+        note is destroyed, it is overwritten with random data. This application
+        does not make any assumptions about the underlying filesystem. Better
+        safe than sorry, we say.</p>
     </div>
     <div class="section">
         <p class="title">Single View</p>
         <p class="desc">The note can be viewed only once. If someone attempts to
-        view the note after the initial viewing, whether or not the note has
-        been destroyed, the client is redirected to a standard 404 error.</p>
+        view the note after the initial viewing, the note has been destroyed, so
+        the client is redirected to a standard 404 error.</p>
     </div>
     <div class="section">
-        <p class="title">AES Encrypted with HMAC-SHA1</p>
+        <p class="title">AES-256 Encrypted with HMAC-SHA512</p>
         <p class="desc">Before storing the note on disk, every note is
-        compressed with ZLIB, then encrypted with AES in CBC mode using
-        HMAC-SHA1 encryption. The AES and HMAC-SHA1 keys are never stored on 
-        disk and are part of the URL.</p>
+        compressed with ZLIB, then encrypted with 256-bit AES in CBC mode using
+        HMAC-SHA512 encryption. The AES-256and HMAC-SHA512 keys are never stored
+        on disk and are part of the URL.</p>
     </div>
     <div class="section">
         <p class="title">Private Passphrase</p>
@@ -29,10 +30,10 @@
         stored in the URL and is part of the encryption and decryption of the
         notes. The application supports using a custom passphrase to encrypt and 
         decrypt the note. This custom passphrase is created using a 
-        password-based key derivation function. The private passphrase is not 
-        stored to disk in the application, but this does not prevent the system
-        administrator from modifying the code to do so. Therefore, it is best 
-        that you host this application yourself, on your own server.</p>
+        password-based key derivation function (PBKDF2). The private passphrase
+        is not stored to disk in the application, but this does not prevent the
+        system administrator from modifying the code to do so. Therefore, it is
+        best that you host this application yourself, on your own server.</p>
     </div>
     <div class="section">
         <p class="title">Hashcash Protected</p>
@@ -50,8 +51,9 @@
         uniquely identifiable resource string. Typically, this is an email
         address. However, with this application, your browser fingerprint is
         used as the resource string. The browser fingerprint is a 32-bit
-        MurmurHash number. By itself, it cannot identify who it belongs to. The
-        system administrator could tie that fingerprint to an IP address and
+        <a href="https://en.wikipedia.org/wiki/MurmurHash">MurmurHash
+        number</a>. By itself, it cannot identify who it belongs to. However,
+        the system administrator could tie that fingerprint to an IP address and
         user agent string by looking in his web server logs.</p>
     </div>
 {% endblock %}
