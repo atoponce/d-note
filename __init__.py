@@ -12,7 +12,7 @@ try:
     import dconfig
 except ImportError:
     with open('dconfig.py','w') as f:
-        f.write('uri_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
+        f.write('nonce_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
         f.write('aes_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
         f.write('mac_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
     import dconfig
@@ -111,7 +111,7 @@ def verify_hashcash(token):
         else:
             return False
 
-def note_encrypt(key, mac_key, plaintext, fname, key_file):
+def note_encrypt(aes_key, mac_key, plaintext, fname, key_file):
     """Encrypt a plaintext to a URI file.
 
     All files are encrypted with AES in CBC mode. HMAC-SHA512 is used
@@ -119,7 +119,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
     are stored on the server.
 
     Keyword arguments:
-    key -- aes private key to encrypt the plaintext.
+    aes_key -- aes private key to encrypt the plaintext.
     hmac_key -- hmac-sha1 key for authenticated encryption.
     plaintext -- the message to be encrypted.
     fname -- file to save the encrypted text to.
@@ -132,7 +132,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
         iv = Random.new().read(AES.block_size) # Fixed block size to 16 bytes.
-        aes = AES.new(key, AES.MODE_CBC, iv)
+        aes = AES.new(aes_key, AES.MODE_CBC, iv)
         ciphertext = aes.encrypt(plain)
         ciphertext = iv + ciphertext
         # generate a hmac tag
@@ -140,11 +140,11 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext)
 
-def note_decrypt(key, mac_key, fname):
+def note_decrypt(aes_key, mac_key, fname):
     """Decrypt the ciphertext from a given URI file.
 
     Keyword arguments:
-    key -- aes private key to decrypt the plaintext
+    aes_key -- aes private key to decrypt the plaintext
     hmac_key -- hmac-sha1 key for authenticated encryption
     fname -- filename containing the message to be decrypted
     """
@@ -156,7 +156,7 @@ def note_decrypt(key, mac_key, fname):
     data = message[64:]
     iv = data[:16]
     body = data[16:]
-    aes = AES.new(key, AES.MODE_CBC,iv)
+    aes = AES.new(aes_key, AES.MODE_CBC,iv)
     plaintext = aes.decrypt(body)
     # check the message tags, return 0 if is good
     # constant time comparison
@@ -175,16 +175,16 @@ def create_url():
 
     Encode into a 22-byte URI.
     """
-    uri = Random.new().read(16)
-    uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
-    fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
-    key = uri_data[16:48] # 32 bytes for AES key
-    mac_key = uri_data[48:] # 64 bytes for HMAC
+    nonce = Random.new().read(16)
+    url = base64.urlsafe_b64encode(nonce)[:22]
+    fkey = KDF.PBKDF2(nonce,dconfig.nonce_salt.decode("hex"),16)
+    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
+    aes_key = KDF.PBKDF2(nonce,dconfig.aes_salt.decode("hex"),32)
+    mac_key = KDF.PBKDF2(nonce,dconfig.mac_salt.decode("hex"),64)
     if os.path.exists('%s/data/%s' % (here, fname)):
         return create_url()
     # remove the last 2 "==" from the url
-    new_url = base64.urlsafe_b64encode(uri)[:22]
-    return {"new_url": new_url, "key": key, "mac_key": mac_key, "fname": fname}
+    return {"new_url": url, "key": aes_key, "mac_key": mac_key, "fname": fname}
 
 def decode_url(url):
     """
@@ -195,12 +195,12 @@ def decode_url(url):
     """
     # add the padding back
     url = url + "=="
-    uri = base64.urlsafe_b64decode(url.encode("utf-8"))
-    uri_data = KDF.PBKDF2(uri,dconfig.uri_salt.decode("hex"),112)
-    fname = base64.urlsafe_b64encode(uri_data[:16])[:22]
-    key = uri_data[16:48] # 32 bytes for AES key
-    mac_key = uri_data[48:] # 64 bytes for HMAC
-    return {"key": key, "mac_key": mac_key, "fname":fname}
+    nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
+    fkey = KDF.PBKDF2(nonce,dconfig.nonce_salt.decode("hex"),16)
+    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
+    aes_key = KDF.PBKDF2(nonce,dconfig.aes_salt.decode("hex"),32)
+    mac_key = KDF.PBKDF2(nonce,dconfig.mac_salt.decode("hex"),64)
+    return {"key": aes_key, "mac_key": mac_key, "fname":fname}
 
 @dnote.route('/', methods = ['GET'])
 def index():
@@ -229,7 +229,7 @@ def show_post():
     """Return the random URL after posting the plaintext."""
     new_url = request.form["new_url"]
     url_data = decode_url(new_url)
-    key = url_data["key"]
+    aes_key = url_data["key"]
     mac_key = url_data["mac_key"]
     fname = url_data["fname"]
 
@@ -244,17 +244,17 @@ def show_post():
         return redirect(url_for('index',error='duress'))
 
     if passphrase:
-        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
+        aes_key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
         mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         key_file = True
-        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        note_encrypt(aes_key, mac_key, plaintext, fname, key_file)
         if duress:
             dkey = duress_key(fname)
             return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
         return render_template('post.html', random = new_url, passphrase = passphrase)
     else:
         key_file = False
-        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        note_encrypt(aes_key, mac_key, plaintext, fname, key_file)
         return render_template('post.html', random = new_url)
 
 @dnote.route('/<random_url>', methods = ['POST', 'GET'])
@@ -265,7 +265,7 @@ def fetch_url(random_url):
     random_url -- Random URL representing the encrypted note.
     """
     url_data = decode_url(random_url)
-    key = url_data["key"]
+    aes_key = url_data["key"]
     mac_key = url_data["mac_key"]
     fname = url_data["fname"]
 
@@ -275,7 +275,7 @@ def fetch_url(random_url):
         return render_template('key.html', random = random_url)
     elif os.path.exists('%s/data/%s.key' % (here,fname)) and request.method == 'POST':
         passphrase = request.form['pass']
-        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
+        aes_key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
         mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         if os.path.exists('%s/data/%s.dkey' % (here,fname)):
             with open('%s/data/%s.dkey' % (here,fname), 'r') as f:
@@ -286,7 +286,7 @@ def fetch_url(random_url):
                     return render_template('note.html', text = duress_text())
                 else:
                     try:
-                        hmac_check,plaintext = note_decrypt(key, mac_key, fname)
+                        hmac_check,plaintext = note_decrypt(aes_key, mac_key, fname)
                         if hmac_check != 0 :
                             return render_template('keyerror.html', random = random_url)
                         else:
@@ -299,7 +299,7 @@ def fetch_url(random_url):
                         return render_template('keyerror.html', random = random_url)
         else:
             try:
-                hmac_check,plaintext = note_decrypt(key, mac_key, fname)
+                hmac_check,plaintext = note_decrypt(aes_key, mac_key, fname)
                 if hmac_check != 0 :
                     return render_template('keyerror.html', random = random_url)
                 else:
@@ -311,7 +311,7 @@ def fetch_url(random_url):
             except:
                 return render_template('keyerror.html', random = random_url)
     else:
-        hmac_check,plaintext = note_decrypt(key, mac_key, fname)
+        hmac_check,plaintext = note_decrypt(aes_key, mac_key, fname)
         if hmac_check != 0 :
             return render_template('404.html'), 404
         else:
