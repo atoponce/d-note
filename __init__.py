@@ -179,7 +179,8 @@ def note_decrypt(aes_key, mac_key, fname):
     return hmac_check,zlib.decompress(unpad(plaintext)).decode('utf-8')
 
 def create_url():
-    """Use PBKDF2 to generate a URL, file name, AES key, and MAC key:
+    """Create a cryptographic nonce for our URL, and use PBKDF2 with our nonce
+    and our salts to generate a file name, AES key, and MAC key.
 
         - 128-bits for the URL
         - 128-bits for file name
