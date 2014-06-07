@@ -138,7 +138,7 @@ def note_encrypt(key, mac_key, plaintext, fname, key_file):
         # generate a hmac tag
         hmac = HMAC.new(mac_key,ciphertext,SHA512)
         ciphertext = hmac.digest() + ciphertext
-        f.write(ciphertext.encode("base64"))
+        f.write(ciphertext)
 
 def note_decrypt(key, mac_key, fname):
     """Decrypt the ciphertext from a given URI file.
@@ -152,7 +152,6 @@ def note_decrypt(key, mac_key, fname):
     unpad = lambda s : s[0:-ord(s[-1])]
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
-    message = (message.decode("base64"))
     tag = message[:64]
     data = message[64:]
     iv = data[:16]
