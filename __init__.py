@@ -12,9 +12,9 @@ try:
     import dconfig
 except ImportError:
     with open('dconfig.py','w') as f:
-        f.write('nonce_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
         f.write('aes_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
         f.write('mac_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
+        f.write('nonce_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
     import dconfig
 
 dnote = Flask(__name__)
