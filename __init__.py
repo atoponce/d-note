@@ -243,18 +243,14 @@ def show_post():
     if duress and not passphrase:
         return redirect(url_for('index',error='duress'))
 
-    if duress and passphrase:
-        dkey = duress_key(fname)
+    if passphrase:
         key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
         mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
         key_file = True
         note_encrypt(key, mac_key, plaintext, fname, key_file)
-        return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
-    elif passphrase:
-        key = KDF.PBKDF2(passphrase, dconfig.aes_salt.decode("hex"), 32)
-        mac_key = KDF.PBKDF2(passphrase, dconfig.mac_salt.decode("hex"), 64)
-        key_file = True
-        note_encrypt(key, mac_key, plaintext, fname, key_file)
+        if duress:
+            dkey = duress_key(fname)
+            return render_template('post.html', random = new_url, passphrase = passphrase, duress = dkey)
         return render_template('post.html', random = new_url, passphrase = passphrase)
     else:
         key_file = False
