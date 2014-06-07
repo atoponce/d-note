@@ -193,10 +193,10 @@ def decode_url(url):
     url -- the url after the FQDN provided by the client
     """
     url = url + "==" # add the padding back
+    nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
     f_key = KDF.PBKDF2(nonce,dconfig.nonce_salt.decode("hex"),16)
     aes_key = KDF.PBKDF2(nonce,dconfig.aes_salt.decode("hex"),32)
     mac_key = KDF.PBKDF2(nonce,dconfig.mac_salt.decode("hex"),64)
-    nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
     fname = base64.urlsafe_b64encode(f_key[:16])[:22]
     return {"key": aes_key, "mac_key": mac_key, "fname":fname}
 
