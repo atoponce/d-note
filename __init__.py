@@ -144,11 +144,9 @@ def note_encrypt(aes_key, mac_key, plaintext, fname, key_file):
         open('%s/data/%s.key' % (here, fname), 'a').close()
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
-        iv = Random.new().read(8)
-        ctr = Counter.new(128, initial_value = long(iv.encode('hex'), 16))
+        ctr = Counter.new(128)
         aes = AES.new(aes_key, AES.MODE_CTR, counter=ctr)
         ciphertext = aes.encrypt(plain)
-        ciphertext = iv + ciphertext
         # generate a hmac tag
         hmac = HMAC.new(mac_key,ciphertext,SHA512)
         ciphertext = hmac.digest() + ciphertext
@@ -165,15 +163,13 @@ def note_decrypt(aes_key, mac_key, fname):
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
     tag = message[:64]
-    data = message[64:]
-    iv = data[:8]
-    body = data[8:]
-    ctr = Counter.new(128, initial_value = long(iv.encode('hex'), 16))
+    body = message[64:]
+    ctr = Counter.new(128)
     aes = AES.new(aes_key, AES.MODE_CTR,counter=ctr)
     plaintext = aes.decrypt(body)
     # check the message tags, return 0 if is good
     # constant time comparison
-    tag2 = HMAC.new(mac_key,data,SHA512).digest()
+    tag2 = HMAC.new(mac_key,body,SHA512).digest()
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
