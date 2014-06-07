@@ -198,7 +198,8 @@ def create_url():
     return {"new_url": url, "key": aes_key, "mac_key": mac_key, "fname": fname}
 
 def decode_url(url):
-    """Takes a URL, and returns the file name, AES key, and MAC key.
+    """Takes a URL, and returns the cryptographic nonce. Use PBKDF2 with our
+    nonce and our salts to return the file name, AES key, and MAC key.
 
     keyword arguments:
     url -- the url after the FQDN provided by the client"""
