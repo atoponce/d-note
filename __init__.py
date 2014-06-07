@@ -176,14 +176,13 @@ def create_url():
     Encode into a 22-byte URI.
     """
     nonce = Random.new().read(16)
-    url = base64.urlsafe_b64encode(nonce)[:22]
     fkey = KDF.PBKDF2(nonce,dconfig.nonce_salt.decode("hex"),16)
-    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
     aes_key = KDF.PBKDF2(nonce,dconfig.aes_salt.decode("hex"),32)
     mac_key = KDF.PBKDF2(nonce,dconfig.mac_salt.decode("hex"),64)
+    url = base64.urlsafe_b64encode(nonce)[:22] # remove trailing '==' from url
+    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
     if os.path.exists('%s/data/%s' % (here, fname)):
         return create_url()
-    # remove the last 2 "==" from the url
     return {"new_url": url, "key": aes_key, "mac_key": mac_key, "fname": fname}
 
 def decode_url(url):
@@ -193,13 +192,12 @@ def decode_url(url):
     keyword arguments:
     url -- the url after the FQDN provided by the client
     """
-    # add the padding back
-    url = url + "=="
-    nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
+    url = url + "==" # add the padding back
     fkey = KDF.PBKDF2(nonce,dconfig.nonce_salt.decode("hex"),16)
-    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
     aes_key = KDF.PBKDF2(nonce,dconfig.aes_salt.decode("hex"),32)
     mac_key = KDF.PBKDF2(nonce,dconfig.mac_salt.decode("hex"),64)
+    nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
+    fname = base64.urlsafe_b64encode(fkey[:16])[:22]
     return {"key": aes_key, "mac_key": mac_key, "fname":fname}
 
 @dnote.route('/', methods = ['GET'])
