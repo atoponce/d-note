@@ -4,43 +4,35 @@ Python Documentation
 URL Generation
 --------------
 
-URLs for self destructing notes should not be predictable in any manner. URLs
-are generated using three pieces of information:
+The URLs of self destructing notes should not be predictable in any manner, and 
+are generated from a 16 byte random nonce.
 
-    - The first 22 characters are used for the filename.
-    - The next 22 characters are used for the AES-128 key.
-    - The last 26 characters are used for the HMAC-SHA1 key.
+This nonce is passed through a key derivation function to derive 3 
+additional random byte strings.  
 
-Before constructing our URL, we begin by creating a 52-byte random URI with:
+- a 32 byte AES key
+- a 64 byte HMAC-SHA512 key
+- a 16 bytes random to generate a filename for incoming note.
 
-    >>> uri_rand = Random.new().read(52)
-    >>> base64.urlsafe_b64encode(uri_rand)
-    'FVvA0UW6lRl-OOhM-virDUZibzpCGSKJ4NVf8aBbGGI9EbFgCD86fZczcw7-UXsJA4Gwmg=='
+The URL that the note can be found at is the nonce encoded 
 
-Thus, a 70-character base64-encoded string is generated for each
-submission (ignoring the last two '==' characters). This will give us enough
-random URLs to avoid a collision with 1 in 2^560. The code should be
-self-documenting, however, this might explain things a bit more clearly.
+base64.urlsafe_b64encode(nonce)[:22]
 
-The filename is encoded using `base64.urlsafe_b64encode(uri_rand)[:22]`. This
-gives us the first 22 characters of our random URI for our filename.
+The note is encryted using AES256-CBC-HMAC-SHA512 and stored on disk, with the 
+keys and filename as derived from the nonce.
 
-The note is encrypted with AES. The encryption key is created using
-`uri_rand[16:32]`. This key gives us the next 22 characters in our base64 URL.
-However, if the user supplies a password in the form, then the URL AES key is
-ignored, and the AES encryption key is created with
-`PBKDF2(passphrase,salt1.decode("hex")).read(16)`, where `salt1` is a random
-static string as part of the installation. Should the encrypted note land into
-the wrong hands, PBKDF greatly reduces the speed at which a brute force attack
-can be mounted against the encrypted text looking for the password.
+If the note creator adds an additional passphrase then that passphrase is used 
+to derive the AES and HMAC keys, rather than the ones from the nonce. This is 
+done in the same way as from the random nonce. The passphrase is passed through
+a key derivation function to generating AES265 and HMAC-512 keys.
 
-Finally, the encrypted note is protected with message authentication using
-HMAC-SHA1. This ensures data integrity, both reading the encrypted data from
-disk, as well as ensuring all bits are in place on the wire. The MAC key is
-created with `uri_rand[32:]`, which gives us the last 26 characters in our URL.
-If a form password is supplied, then the URL HMAC key is ignored, and the MAC
-key is created with `PBKDF2(passphrase,salt2.decode("hex")).read(20)`, for the
-same reasons as above.
+As the filename on disk is derived from passing the nonce through a one way
+function it is not possible for the server operator to link a particular
+filename to the URL used to access it.
+
+The use of an HMAC-SHA512 tag on the AES256-CBC encrypted prevents the 
+server operator from being able to tamper with the contents of a note
+whilst they are stored on disk.
 
 The valid characters for our URLs are as follows:
 
@@ -48,7 +40,7 @@ The valid characters for our URLs are as follows:
 
 So, a valid URL for your self destructing notes could be:
 
-    https://example.com/FVvA0UW6lRl-OOhM-virDUZibzpCGSKJ4NVf8aBbGGI9EbFgCD86fZczcw7-UXsJA4Gwmg
+    https://example.com/FVvA0UW6lRl-OOhM-virDU
 
 d-note does not keep track of which URLs have been generated. Thus, it is
 possible, although highly improbable, that the same URL could be generated
