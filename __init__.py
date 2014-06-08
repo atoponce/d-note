@@ -6,6 +6,7 @@ from Crypto.Cipher import AES
 from Crypto.Hash import HMAC, SHA, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Random import random
+from Crypto.Util import Counter
 from flask import Flask, render_template, request, redirect, url_for
 
 try:
@@ -126,7 +127,7 @@ def verify_hashcash(token):
 def note_encrypt(aes_key, mac_key, plaintext, fname, key_file):
     """Encrypt a plaintext to a URI file.
 
-    All files are encrypted with AES in CBC mode. HMAC-SHA512 is used
+    All files are encrypted with AES in CTR mode. HMAC-SHA512 is used
     to provide authenticated encryption ( encrypt then mac ). No private keys
     are stored on the server.
 
@@ -137,17 +138,15 @@ def note_encrypt(aes_key, mac_key, plaintext, fname, key_file):
     fname -- file to save the encrypted text to.
     key_file -- empty file indicating the note was encrypted with a passphrase"""
 
-    pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(AES.block_size - len(s) % AES.block_size)
-    plain = pad(zlib.compress(plaintext.encode('utf-8')))
+    plain = zlib.compress(plaintext.encode('utf-8'))
     if key_file:
         # create empty file with '.key' as an extension
         open('%s/data/%s.key' % (here, fname), 'a').close()
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
-        iv = Random.new().read(AES.block_size) # Fixed block size to 16 bytes.
-        aes = AES.new(aes_key, AES.MODE_CBC, iv)
+        ctr = Counter.new(128)
+        aes = AES.new(aes_key, AES.MODE_CTR, counter=ctr)
         ciphertext = aes.encrypt(plain)
-        ciphertext = iv + ciphertext
         # generate a hmac tag
         hmac = HMAC.new(mac_key,ciphertext,SHA512)
         ciphertext = hmac.digest() + ciphertext
@@ -161,22 +160,20 @@ def note_decrypt(aes_key, mac_key, fname):
     hmac_key -- hmac-sha512 key for authenticated encryption
     fname -- filename containing the message to be decrypted"""
 
-    unpad = lambda s : s[0:-ord(s[-1])]
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
     tag = message[:64]
-    data = message[64:]
-    iv = data[:16]
-    body = data[16:]
-    aes = AES.new(aes_key, AES.MODE_CBC,iv)
+    body = message[64:]
+    ctr = Counter.new(128)
+    aes = AES.new(aes_key, AES.MODE_CTR,counter=ctr)
     plaintext = aes.decrypt(body)
     # check the message tags, return 0 if is good
     # constant time comparison
-    tag2 = HMAC.new(mac_key,data,SHA512).digest()
+    tag2 = HMAC.new(mac_key,body,SHA512).digest()
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
-    return hmac_check,zlib.decompress(unpad(plaintext)).decode('utf-8')
+    return hmac_check,zlib.decompress(plaintext).decode('utf-8')
 
 def create_url():
     """Create a cryptographic nonce for our URL, and use PBKDF2 with our nonce
