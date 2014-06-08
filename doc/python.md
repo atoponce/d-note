@@ -18,7 +18,7 @@ The URL that the note can be found at is the nonce encoded
 
 base64.urlsafe_b64encode(nonce)[:22]
 
-The note is encryted using AES256-CBC-HMAC-SHA512 and stored on disk, with the 
+The note is encryted using AES256-CTR-HMAC-SHA512 and stored on disk, with the 
 keys and filename as derived from the nonce.
 
 If the note creator adds an additional passphrase then that passphrase is used 
@@ -30,7 +30,7 @@ As the filename on disk is derived from passing the nonce through a one way
 function it is not possible for the server operator to link a particular
 filename to the URL used to access it.
 
-The use of an HMAC-SHA512 tag on the AES256-CBC encrypted prevents the 
+The use of an HMAC-SHA512 tag on the AES256-CTR encrypted prevents the 
 server operator from being able to tamper with the contents of a note
 whilst they are stored on disk.
 
