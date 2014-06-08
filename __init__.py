@@ -140,15 +140,15 @@ def note_encrypt(aes_key, mac_key, plaintext, fname, key_file):
 
     plain = zlib.compress(plaintext.encode('utf-8'))
     if key_file:
-        # create empty file with '.key' as an extension
-        open('%s/data/%s.key' % (here, fname), 'a').close()
+        open('%s/data/%s.key' % (here, fname), 'a').close() # empty file
 
     with open('%s/data/%s' % (here,fname), 'w') as f:
-        ctr = Counter.new(128)
-        aes = AES.new(aes_key, AES.MODE_CTR, counter=ctr)
+        iv = Random.new().read(12) # 96-bits
+        ctr = Counter.new(128, initial_value = long(iv.encode('hex'), 16))
+        aes = AES.new(aes_key, AES.MODE_CTR, counter = ctr)
         ciphertext = aes.encrypt(plain)
-        # generate a hmac tag
-        hmac = HMAC.new(mac_key,ciphertext,SHA512)
+        ciphertext = iv + ciphertext
+        hmac = HMAC.new(mac_key,ciphertext,SHA512) # generate a hmac tag
         ciphertext = hmac.digest() + ciphertext
         f.write(ciphertext)
 
@@ -163,13 +163,15 @@ def note_decrypt(aes_key, mac_key, fname):
     with open('%s/data/%s' % (here, fname), 'r') as f:
         message = f.read()
     tag = message[:64]
-    body = message[64:]
-    ctr = Counter.new(128)
-    aes = AES.new(aes_key, AES.MODE_CTR,counter=ctr)
+    data = message[64:]
+    iv = data[:12]
+    body = data[12:]
+    ctr = Counter.new(128, initial_value = long(iv.encode('hex'), 16))
+    aes = AES.new(aes_key, AES.MODE_CTR, counter = ctr)
     plaintext = aes.decrypt(body)
     # check the message tags, return 0 if is good
     # constant time comparison
-    tag2 = HMAC.new(mac_key,body,SHA512).digest()
+    tag2 = HMAC.new(mac_key,data,SHA512).digest()
     hmac_check = 0
     for x, y in zip(tag, tag2):
         hmac_check |= ord(x) ^ ord(y)
@@ -326,6 +328,6 @@ def fetch_url(random_url):
             return render_template('note.html', text = plaintext)
 
 if __name__ == '__main__':
-    dnote.debug = True
+    #dnote.debug = True
     #cleanup_unread()
     dnote.run()
