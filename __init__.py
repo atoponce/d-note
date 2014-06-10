@@ -328,6 +328,6 @@ def fetch_url(random_url):
             return render_template('note.html', text = plaintext)
 
 if __name__ == '__main__':
-    #dnote.debug = True
+    dnote.debug = True
     #cleanup_unread()
     dnote.run()
