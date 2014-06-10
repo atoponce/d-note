@@ -153,12 +153,18 @@ class Note(object):
         ctr = Counter.new(128, initial_value = long(iv.encode('hex'), 16))
         aes = AES.new(self.aes_key, AES.MODE_CTR, counter = ctr)
         plaintext = aes.decrypt(body)
-        try:
-            self.plaintext = zlib.decompress(plaintext).decode('utf-8')
-        except zlib.error:
-            return False
-        # check the message tags, return 0 if is good
+        # check the message tags, return True if is good
         # constant time comparison
         tag2 = HMAC.new(self.mac_key,data,SHA512).digest()
-        return tag == tag2
+        hmac_check = 0
+        for x, y in zip(tag, tag2):
+            hmac_check |= ord(x) ^ ord(y)
+        if hmac_check == 0:
+            try:
+                self.plaintext = zlib.decompress(plaintext).decode('utf-8')
+            except zlib.error:
+                return False
+        else: 
+           Return False
+        return True
 
