@@ -140,11 +140,11 @@ def fetch_url(random_url):
 
     note = Note(random_url)
 
-    if not os.path.exists(note.path()):
+    if not note.exists():
         return render_template('404.html'), 404
-    elif os.path.exists(note.path('key')) and request.method != 'POST':
+    elif note.needs_passphrase() and request.method != 'POST':
         return render_template('key.html', random = note.url)
-    elif os.path.exists(note.path('key')) and request.method == 'POST':
+    elif note.needs_passphrase() and request.method == 'POST':
         passphrase = request.form['pass']
         note.set_passphrase(passphrase)
         if passphrase == note.dkey:

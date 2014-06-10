@@ -17,7 +17,9 @@ except ImportError:
         f.write('nonce_salt = "{0}"\n'.format(Random.new().read(16).encode('hex')))
     import dconfig
 
-here = os.path.dirname(os.path.realpath(__file__))
+DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
 class Note(object):
     """Note Model"""
@@ -38,12 +40,20 @@ class Note(object):
         else:
             self.decode_url(url)
 
+    def exists(self):
+        """Checks if note already exists"""
+        return os.path.exists(self.path())
+
+    def needs_passphrase(self):
+        """Checks if custom passphrase is required"""
+        return os.path.exists(self.path('key'))
+
     def path(self,kind=None):
         """Return the file path to the note file"""
         if kind is None:
-            return '%s/data/%s' % (here, self.fname)
+            return '%s/%s' % (DATA_DIR, self.fname)
         else:
-            return '%s/data/%s.%s' % (here, self.fname, kind)
+            return '%s/%s.%s' % (DATA_DIR, self.fname, kind)
 
     def create_url(self):
         """Create a cryptographic nonce for our URL, and use PBKDF2 with our nonce
@@ -60,7 +70,7 @@ class Note(object):
         self.mac_key = KDF.PBKDF2(self.nonce,dconfig.mac_salt.decode("hex"),64)
         self.url = base64.urlsafe_b64encode(self.nonce)[:22] # remove trailing '==' from url
         self.fname = base64.urlsafe_b64encode(self.f_key)[:22]
-        if os.path.exists(self.path()):
+        if self.exists():
             return self.create_url()
     
     def decode_url(self,url):
@@ -130,7 +140,6 @@ class Note(object):
             hmac = HMAC.new(self.mac_key,ciphertext,SHA512) # generate a hmac tag
             ciphertext = hmac.digest() + ciphertext
             f.write(ciphertext)
-            self.ciphertext = ciphertext
     
     def decrypt(self):
         """Decrypt the ciphertext from a given URI file."""
@@ -151,12 +160,5 @@ class Note(object):
         # check the message tags, return 0 if is good
         # constant time comparison
         tag2 = HMAC.new(self.mac_key,data,SHA512).digest()
-        hmac_check = 0
-        for x, y in zip(tag, tag2):
-            hmac_check |= ord(x) ^ ord(y)
-
-        if hmac_check == 0:
-            return True
-        else:
-            return False
+        return tag == tag2
 
