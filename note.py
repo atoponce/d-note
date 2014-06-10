@@ -165,6 +165,6 @@ class Note(object):
             except zlib.error:
                 return False
         else: 
-           Return False
+            return False
         return True
 
