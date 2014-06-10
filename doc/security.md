@@ -44,3 +44,44 @@ page load, a token is generated that uniquely identifies your browser with about
 introduced by the EFF. This token is submitted to the server during form
 submission. If the SHA1 hash of the token is valid, the form is sucessfully
 submitted. Otherwise, an error is thrown.
+
+Some Mathematics
+----------------
+
+Each URL is the result of a number picked at random from a 128-bit space, or
+2^128 total URLs that could be generated. Using the birthday attack, we can
+estimate how long it would take to find the probability of 50% in generating a
+duplicate URL.
+
+According to the birthday attack, we would need to generate approximately
+2.3x10^19 URLs to have a probability of 50% that we have generated a duplicate
+URL. If we were processing one billion URLs every second, it would take 733
+years before we reached that probability. Because the URL is the base-64 encoded
+cryptographic nonce that is responsible for the entire structure of the
+application, it is critical that the system has enough entropy to pick a truly
+random number from that 128-bit space.
+
+For AES in counting mode, you are limited by a pre-determined counting space.
+IE: the maximum number of blocks that you will allow to be encrypted. According
+to NIST, the AES standardized block size is 16-bytes. d-note uses a counting
+space of 128-bits, which gives us a total encryption size of:
+
+    16 * 2^128 bytes == 2^132 bytes
+
+However, d-note also uses a randomly chosen initial value to start the counting.
+Due to a bug with AES in PyCrypto, if that counting value surpasses the maximum
+value of the counting space, and wraps around to zero, the application will
+crash. Instead, the application should crash only after every value in the
+counting space has been evaluated, and a repeat value is used. Regardless, we
+must back off a bit on the initial value space to prevent that counter from
+wrapping back to zero.
+
+As such, the initial value space is chosen at random from a 96-bit counting
+space. This leaves a 32-bit counting space minimum of encryptable blocks, or:
+
+    16 * 2^32 bytes == 2^36 bytes
+
+A file that is 2^32 bytes in size is 4 GB. d-note should never need to encrypt
+anything larger than 8 MB, which is 2^23 bytes in size. As such, we have enough
+overhead to prevent the application from crashing due to running out of
+counters.
