@@ -4,3 +4,4 @@ uwsgi.ini
 *.pyc
 *.swp
 .*.swp
+*~
