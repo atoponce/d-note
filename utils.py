@@ -1,3 +1,5 @@
+"""Utility functions for d-note."""
+import dconfig
 from Crypto.Hash import SHA
 from Crypto.Random import random
 from note import DATA_DIR
@@ -11,23 +13,23 @@ def send_email(link, recipient):
 
     import email.utils
     import smtplib
-    import time
     from email.mime.text import MIMEText
     msg = MIMEText("%s" % link)
     msg['To'] = email.utils.formataddr(('Self Destructing Notes', recipient))
-    msg['From'] = email.utils.formataddr((fullname, fromaddr))
-    s = smtplib.SMTP('localhost')
-    s.sendmail(fromaddr, [recipient], msg.as_string())
-    s.quit()
+    msg['From'] = email.utils.formataddr((dconfig.fullname, dconfig.fromaddr))
+    smtp = smtplib.SMTP('localhost')
+    smtp.sendmail(dconfig.fromaddr, [recipient], msg.as_string())
+    smtp.quit()
 
 def duress_text():
     """Return 5 random sentences of the Zen of Python."""
     import subprocess
     text = ''
-    p = subprocess.Popen(('python','-c','import this'), stdout=subprocess.PIPE,)
-    s = [x for x in p.communicate()[0].splitlines() if x != '']
-    for i in range(5):
-        text = text + random.choice(s) + ' '
+    python = subprocess.Popen(('python', '-c', 'import this'),
+                              stdout=subprocess.PIPE)
+    sentence = [x for x in python.communicate()[0].splitlines() if x != '']
+    for _ in range(5):
+        text = text + random.choice(sentence) + ' '
     return text
 
 def verify_hashcash(token):
@@ -43,9 +45,9 @@ def verify_hashcash(token):
     token -- a proposed Hashcash token to validate."""
 
     digest = SHA.new(token)
-    with open('%s/hashcash.db' % DATA_DIR, 'a+') as f:
-        if digest.hexdigest()[:4] == '0000' and token not in f.read():
-            f.write(token+'\n')
+    with open('%s/hashcash.db' % DATA_DIR, 'a+') as database:
+        if digest.hexdigest()[:4] == '0000' and token not in database.read():
+            database.write(token+'\n')
             return True
         else:
             return False

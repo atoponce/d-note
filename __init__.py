@@ -1,10 +1,11 @@
+"""This module sets up the paths for the Flask web application."""
 import os
+import utils
 from flask import Flask, render_template, request, redirect, url_for
 from note import Note
-from utils import *
 
-dnote = Flask(__name__)
-here = dnote.root_path
+DNOTE = Flask(__name__)
+HERE = DNOTE.root_path
 
 def async(func):
     """Return threaded wrapper decorator.
@@ -14,72 +15,78 @@ def async(func):
 
     from threading import Thread
     def wrapper(*args, **kwargs):
-        t = Thread(target = func, args = args, kwargs = kwargs)
-        t.start()
+        """Decorator for asynchronous note destruction."""
+        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
     return wrapper
 
 @async
 def cleanup_unread():
     """Destroy unread notes older than 30 days."""
 
+    import time
     while True:
         seek_time = time.time()
-        for f in os.listdir('%s/data/' % here):
-            file_mtime = os.stat('%s/data/%s' % (here, f))[8]
-            if (seek_time - file_mtime) >= 2592000 and 'hashcash.db' not in f:
-                secure_remove('%s/data/%s' % (here, f))
+        for note in os.listdir('%s/data/' % HERE):
+            file_mtime = os.stat('%s/data/%s' % (HERE, note))[8]
+            if ((seek_time - file_mtime) >= 2592000
+                    and 'hashcash.db' not in note):
+                Note.secure_remove('%s/data/%s' % (HERE, note))
         time.sleep(86400) # wait for 1 day
 
-@dnote.route('/', methods = ['GET'])
+@DNOTE.route('/', methods=['GET'])
 def index():
     """Return the index.html for the main application."""
-    error = request.args.get('error',None)
+    error = request.args.get('error', None)
     note = Note()
-    return render_template('index.html', random = note.url, error = error)
+    return render_template('index.html', random=note.url, error=error)
 
-@dnote.route('/security/', methods = ['GET'])
+@DNOTE.route('/security/', methods=['GET'])
 def security():
     """Return the index.html for the security page."""
     return render_template('security.html')
 
-@dnote.route('/faq/', methods = ['GET'])
+@DNOTE.route('/faq/', methods=['GET'])
 def faq():
     """Return the index.html for the faq page."""
     return render_template('faq.html')
 
-@dnote.route('/about/', methods = ['GET'])
+@DNOTE.route('/about/', methods=['GET'])
 def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
 
-@dnote.route('/post', methods = ['POST'])
+@DNOTE.route('/post', methods=['POST'])
 def show_post():
     """Return the random URL after posting the plaintext."""
     new_url = request.form["new_url"]
     note = Note(new_url)
     note.plaintext = request.form['paste']
 
-    passphrase = request.form.get('pass',False)
-    duress = request.form.get('duress',False)
+    passphrase = request.form.get('pass', False)
+    duress = request.form.get('duress', False)
     token = request.form['hashcash']
 
-    if not verify_hashcash(token):
-        return redirect(url_for('index',error='hashcash'))
+    if not utils.verify_hashcash(token):
+        return redirect(url_for('index', error='hashcash'))
     if duress and not passphrase:
-        return redirect(url_for('index',error='duress'))
+        return redirect(url_for('index', error='duress'))
 
     if passphrase:
         note.set_passphrase(passphrase)
         note.encrypt()
         if duress:
             note.duress_key()
-            return render_template('post.html', random = note.url, passphrase = note.passphrase, duress = note.dkey)
-        return render_template('post.html', random = note.url, passphrase = note.passphrase)
+            return render_template('post.html', random=note.url,
+                                   passphrase=note.passphrase,
+                                   duress=note.dkey)
+        return render_template('post.html', random=note.url,
+                               passphrase=note.passphrase)
     else:
         note.encrypt()
-        return render_template('post.html', random = note.url)
+        return render_template('post.html', random=note.url)
 
-@dnote.route('/<random_url>', methods = ['POST', 'GET'])
+@DNOTE.route('/<random_url>', methods=['POST', 'GET'])
 def fetch_url(random_url):
     """Return the decrypted note. Begin short destruction timer.
 
@@ -91,27 +98,27 @@ def fetch_url(random_url):
     if not note.exists():
         return render_template('404.html'), 404
     elif note.needs_passphrase() and request.method != 'POST':
-        return render_template('key.html', random = note.url)
+        return render_template('key.html', random=note.url)
     elif note.needs_passphrase() and request.method == 'POST':
         passphrase = request.form['pass']
         note.set_passphrase(passphrase)
         if passphrase == note.dkey:
             note.secure_remove()
-            return render_template('note.html', text = duress_text())
+            return render_template('note.html', text=utils.duress_text())
         else:
             if note.decrypt():
                 note.secure_remove()
-                return render_template('note.html', text = note.plaintext)
+                return render_template('note.html', text=note.plaintext)
             else:
-                return render_template('keyerror.html', random = note.url)
+                return render_template('keyerror.html', random=note.url)
     else:
         if note.decrypt():
             note.secure_remove()
-            return render_template('note.html', text = note.plaintext)
+            return render_template('note.html', text=note.plaintext)
         else:
             return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    dnote.debug = True
+    DNOTE.debug = True
     #cleanup_unread()
-    dnote.run()
+    DNOTE.run()
