@@ -11,13 +11,16 @@
         }
     </script>
 {% endblock %}
+{% block destroy %}
+            <span class="nav"><a class="destroy" href="{{ url_for('fetch_url',
+            random_url=random, _external=True) }}">Destroy the note
+            now</a></span>
+{% endblock%}
 {% block content %}
-    <p>Copy this link and send it to your recipient. Or, <a href="{{
-    url_for('fetch_url', random_url=random, _external=True) }}">you can destroy
-    it now</a>.</p>
-    <p>Your private url:<br/>
-    <input id="note" style="width: 100%;" readonly="readonly" type="text" value="{{
-    url_for('fetch_url', random_url=random, _external=True) }}"/></p>
+    <p>The full private url:<br/>
+    {{ url_for('fetch_url', random_url=random, _external=True) }}
+    <p>Just the private ID:<br/>
+    {{ random }}</p>
     {% if passphrase %}
     <p>Your passphrase:<br/>
     <input size="25" readonly="readonly" type="text" value="{{ passphrase

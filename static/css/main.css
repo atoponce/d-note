@@ -21,6 +21,10 @@ body {
     margin-right: 25px;
 }
 
+.nav .destroy:link{
+    color: red;
+}
+
 .tooltip {
     background: #c9c9c9;
     border-radius: 20px;

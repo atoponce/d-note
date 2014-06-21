@@ -21,6 +21,7 @@
             }}">Security</a></span>
             <span class="nav"><a href="{{ url_for('faq') }}">FAQ</a></span>
             <span class="nav"><a href="{{ url_for('about') }}">About</a></span>
+            {% block destroy %}{% endblock %}
         </div>
         <div id="content">
             {% block content %}{% endblock %}
