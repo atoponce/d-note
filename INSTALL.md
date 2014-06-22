@@ -43,7 +43,7 @@ Add the following contents to that file:
     import logging
     logging.basicConfig(stream=sys.stderr)
     sys.path.insert(0,"/var/www/dnote/")
-    from dnote import dnote as application
+    from dnote import DNOTE as application
  
 Now configure Apache to server the application. Create
 `/etc/apache2/site-available/` with the following contents. It&#39;s important
