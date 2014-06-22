@@ -25,10 +25,6 @@
         Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
         <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
         <br/>
-        <input type="checkbox" id="duress" name="duress">Add a duress key.
-        <!-- do not wrap at 80-characters. the hover text breaks -->
-        <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
-        <br/>
         <input type="hidden" id="hashcash" name="hashcash">
         <input type="submit" id="submit" value="Submit">
         <span id="progress">(Please be patient while token is calculated.)</span>

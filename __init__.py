@@ -1,6 +1,7 @@
 """This module sets up the paths for the Flask web application."""
 import os
 import utils
+from Crypto import Random
 from flask import Flask, render_template, request, redirect, url_for
 from note import Note
 
@@ -64,7 +65,7 @@ def show_post():
     note.plaintext = request.form['paste']
 
     passphrase = request.form.get('pass', False)
-    duress = request.form.get('duress', False)
+    duress = note.dkey
     token = request.form['hashcash']
 
     if not utils.verify_hashcash(token):
@@ -75,13 +76,9 @@ def show_post():
     if passphrase:
         note.set_passphrase(passphrase)
         note.encrypt()
-        if duress:
-            note.duress_key()
-            return render_template('post.html', random=note.url,
-                                   passphrase=note.passphrase,
-                                   duress=note.dkey)
+        note.duress_key()
         return render_template('post.html', random=note.url,
-                               passphrase=note.passphrase)
+                               passphrase=note.passphrase, duress=note.dkey)
     else:
         note.encrypt()
         return render_template('post.html', random=note.url)
@@ -104,7 +101,7 @@ def fetch_url(random_url):
         note.set_passphrase(passphrase)
         if passphrase == note.dkey:
             note.secure_remove()
-            return render_template('note.html', text = duress_text())
+            return render_template('note.html', text = utils.duress_text())
     if note.decrypt():
         note.secure_remove()
         return render_template('note.html', text = note.plaintext)

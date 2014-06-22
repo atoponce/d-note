@@ -18,11 +18,11 @@ function validate_form() {
         alert("You need to enter a message.");
         return false;
     }
-    else if (document.getElementById('duress').checked && 
+    /*else if (document.getElementById('duress').checked && 
              document.getElementById('passphrase').value == "") {
         alert("You need to enter a passphrase if you enable a duress key");
         return false;
-    }
+    }*/
     else {
         please_wait();
         setTimeout(function(){},0);

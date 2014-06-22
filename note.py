@@ -16,6 +16,7 @@ except ImportError:
         f.write('aes_salt = "%s"\n' % Random.new().read(16).encode('hex'))
         f.write('mac_salt = "%s"\n' % Random.new().read(16).encode('hex'))
         f.write('nonce_salt = "%s"\n' % Random.new().read(16).encode('hex'))
+        f.write('duress_salt = "%s"\n' % Random.new().read(16).encode('hex'))
         f.write('fullname = "John Doe"')
         f.write('fromaddr = "jdoe@example.com"')
     import dconfig
@@ -26,14 +27,14 @@ if not os.path.exists(DATA_DIR):
 
 class Note(object):
     """Note Model"""
-    url = None      # URI of Note
-    nonce = None    # ID decoded from url
-    fname = None    # File name
-    f_key = None    # ID decoded from fname
-    aes_key = None  # AES encryption key
-    mac_key = None  # HMAC verification key
+    url = None          # URI of Note
+    nonce = None        # ID decoded from url
+    fname = None        # File name
+    f_key = None        # ID decoded from fname
+    aes_key = None      # AES encryption key
+    mac_key = None      # HMAC verification key
     passphrase = None   # User provided passphrase
-    dkey = None     # Duress passphrase
+    dkey = None         # Duress passphrase
     plaintext = None    # Plain text note
     ciphertext = None   # Encrypted text
 
@@ -91,10 +92,10 @@ class Note(object):
             self.nonce, dconfig.aes_salt.decode("hex"), 32)
         self.mac_key = KDF.PBKDF2(
             self.nonce, dconfig.mac_salt.decode("hex"), 64)
+        duress = KDF.PBKDF2(
+            self.nonce, dconfig.duress_salt.decode("hex"), 16)
+        self.dkey = base64.urlsafe_b64encode(duress)[:22]
         self.fname = base64.urlsafe_b64encode(self.f_key)[:22]
-        if os.path.exists(self.path('dkey')):
-            with open(self.path('dkey'), 'r') as dkey:
-                self.dkey = dkey.read()
 
     def set_passphrase(self, passphrase):
         """Set a user defined passphrase to override the AES and HMAC keys"""
@@ -107,12 +108,9 @@ class Note(object):
     def duress_key(self):
         """Generates a duress key for Big Brother. It is stored on disk in
         plaintext."""
-
-        import string
-        chars = string.ascii_letters + string.digits + '-_'
-        self.dkey = ''.join(random.choice(chars) for i in xrange(22))
-        with open(self.path('dkey'), 'w') as dkey:
-            dkey.write(self.dkey)
+        duress_key = KDF.PBKDF2(
+            self.nonce, dconfig.duress_salt.decode('hex'), 16)
+        self.dkey = base64.urlsafe_b64encode(duress_key)[:22]
 
     def secure_remove(self):
         """Securely overwrite any file, then remove the file. Do not make any
