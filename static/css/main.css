@@ -39,3 +39,7 @@ body {
 .tooltip:hover {
     background: #a1a4c9;
 }
+
+.mono {
+    font-family: Andale Mono, monospace;
+}

@@ -113,8 +113,8 @@ class Note(object):
         plaintext."""
 
         import string
-        chars = string.ascii_letters + string.digits
-        self.dkey = ''.join(random.choice(chars) for i in xrange(24))
+        chars = string.ascii_letters + string.digits + '-_'
+        self.dkey = ''.join(random.choice(chars) for i in xrange(22))
         with open(self.path('dkey'), 'w') as dkey:
             dkey.write(self.dkey)
 

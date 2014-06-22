@@ -12,23 +12,25 @@
     </script>
 {% endblock %}
 {% block destroy %}
-            <span class="nav"><a class="destroy" href="{{ url_for('fetch_url',
-            random_url=random, _external=True) }}">Destroy the note
-            now</a></span>
+            <span class="nav"><a class="destroy" href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Destroy note</a></span>
 {% endblock%}
 {% block content %}
-    <p>The full private url:<br/>
-    {{ url_for('fetch_url', random_url=random, _external=True) }}
-    <p>Just the private ID:<br/>
-    {{ random }}</p>
+    <p><u>Your private url:</u>
+        <span class="mono">{{ url_for('fetch_url', random_url=random, _external=True) }}</span>
+    </p>
+    <p><u>Your private ID:</u>
+        <span class="mono">{{ random }}</span>
+        <span class="tooltip" title="For plausible deniability, provide just the private ID to the note, rather than the full URL.">&nbsp;?&nbsp;</span>
+    </p>
     {% if passphrase %}
-    <p>Your passphrase:<br/>
-    <input size="25" readonly="readonly" type="text" value="{{ passphrase
-    }}"/></p>
+    <p><u>Your passphrase:</u>
+        <span class="mono">{{ passphrase}}</span>
+    </p>
     {% endif %}
     {% if duress %}
-    <p>Your duress key:<br/>
-    <input size="25" readonly="readonly" type="text" value="{{ duress }}"/></p>
+    <p><u>Your duress key:</u>
+        <span class="mono">{{ duress }}</span>
+    </p>
     {% endif %}
     <p>Alternatively, you can scan this QR code, and "share" it using your
     mobile device via text message, email, etc. <strong>NOTE:</strong> <a
