@@ -65,13 +65,10 @@ def show_post():
     note.plaintext = request.form['paste']
 
     passphrase = request.form.get('pass', False)
-    duress = note.dkey
     token = request.form['hashcash']
 
     if not utils.verify_hashcash(token):
         return redirect(url_for('index', error='hashcash'))
-    if duress and not passphrase:
-        return redirect(url_for('index', error='duress'))
 
     if passphrase:
         note.set_passphrase(passphrase)
