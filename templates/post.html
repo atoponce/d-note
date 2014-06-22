@@ -20,6 +20,7 @@
     </p>
     <p><u>Your private ID:</u>
         <span class="mono">{{ random }}</span>
+        <!-- do not wrap at 80-characters. the hover text breaks -->
         <span class="tooltip" title="For plausible deniability, provide just the private ID to the note, rather than the full URL.">&nbsp;?&nbsp;</span>
     </p>
     {% if passphrase %}
@@ -30,6 +31,8 @@
     {% if duress %}
     <p><u>Your duress key:</u>
         <span class="mono">{{ duress }}</span>
+        <!-- do not wrap at 80-characters. the hover text breaks -->
+        <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
     </p>
     {% endif %}
     <p>Alternatively, you can scan this QR code, and "share" it using your
