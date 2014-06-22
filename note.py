@@ -47,11 +47,7 @@ class Note(object):
         """Checks if note already exists"""
         return os.path.exists(self.path())
 
-    def needs_passphrase(self):
-        """Checks if custom passphrase is required"""
-        return os.path.exists(self.path('key'))
-
-    def path(self, kind=None):
+    def path(self,kind=None):
         """Return the file path to the note file"""
         if kind is None:
             return '%s/%s' % (DATA_DIR, self.fname)
@@ -136,18 +132,14 @@ class Note(object):
         """Encrypt a plaintext to a URI file.
 
         All files are encrypted with AES in CTR mode. HMAC-SHA512 is used
-        to provide authenticated encryption ( encrypt then mac ). No private
-        keys are stored on the server."""
-
-        plain = zlib.compress(self.plaintext.encode('utf-8'))
-        if self.passphrase is not None:
-            open(self.path('key'), 'a').close() # empty file
-
+        to provide authenticated encryption ( encrypt then mac ). No private keys
+        are stored on the server."""
+    
+        plain = self.plaintext.encode('utf-8')
         with open(self.path(), 'w') as note:
             init_value = Random.new().read(12) # 96-bits
-            ctr = Counter.new(
-                128, initial_value=long(init_value.encode('hex'), 16))
-            aes = AES.new(self.aes_key, AES.MODE_CTR, counter=ctr)
+            ctr = Counter.new(128, initial_value = long(init_value.encode('hex'), 16))
+            aes = AES.new(self.aes_key, AES.MODE_CTR, counter = ctr)
             ciphertext = aes.encrypt(plain)
             ciphertext = init_value + ciphertext
             hmac = HMAC.new(self.mac_key, ciphertext, SHA512)
@@ -173,10 +165,7 @@ class Note(object):
         for char1, char2 in zip(tag, tag2):
             hmac_check |= ord(char1) ^ ord(char2)
         if hmac_check == 0:
-            try:
-                self.plaintext = zlib.decompress(plaintext).decode('utf-8')
-            except zlib.error:
-                return False
-        else:
+            self.plaintext =plaintext
+        else: 
             return False
         return True
