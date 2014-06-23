@@ -17,8 +17,6 @@ except ImportError:
         f.write('mac_salt = "%s"\n' % Random.new().read(16).encode('hex'))
         f.write('nonce_salt = "%s"\n' % Random.new().read(16).encode('hex'))
         f.write('duress_salt = "%s"\n' % Random.new().read(16).encode('hex'))
-        f.write('fullname = "John Doe"')
-        f.write('fromaddr = "jdoe@example.com"')
     import dconfig
 
 DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"

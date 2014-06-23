@@ -8,33 +8,6 @@ from note import Note
 DNOTE = Flask(__name__)
 HERE = DNOTE.root_path
 
-def async(func):
-    """Return threaded wrapper decorator.
-
-    Keyword arguments:
-    func -- the function this decorator is threading"""
-
-    from threading import Thread
-    def wrapper(*args, **kwargs):
-        """Decorator for asynchronous note destruction."""
-        thread = Thread(target=func, args=args, kwargs=kwargs)
-        thread.start()
-    return wrapper
-
-@async
-def cleanup_unread():
-    """Destroy unread notes older than 30 days."""
-
-    import time
-    while True:
-        seek_time = time.time()
-        for note in os.listdir('%s/data/' % HERE):
-            file_mtime = os.stat('%s/data/%s' % (HERE, note))[8]
-            if ((seek_time - file_mtime) >= 2592000
-                    and 'hashcash.db' not in note):
-                Note.secure_remove('%s/data/%s' % (HERE, note))
-        time.sleep(86400) # wait for 1 day
-
 @DNOTE.route('/', methods=['GET'])
 def index():
     """Return the index.html for the main application."""
