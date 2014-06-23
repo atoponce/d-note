@@ -80,5 +80,4 @@ def fetch_url(random_url):
 
 if __name__ == '__main__':
     DNOTE.debug = True
-    #cleanup_unread()
     DNOTE.run()
