@@ -11,7 +11,7 @@ function seed() {
     if (s == 0 || s == 1) {
         seed();
     }
-    return s
+    return s;
 }
 
 function bbs(n) {
@@ -22,7 +22,6 @@ function bbs(n) {
     var s = seed();
 
     // s should be coprime to p*q
-    //while(s%(p*q) != 1) {
     while(gcd(p*q, s) != 1) {
         s = seed();
     }
