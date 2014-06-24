@@ -47,7 +47,7 @@ function gcd(x, y) {
 } 
 
 function seed() {
-    var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1;
+    var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1; //odd
     if(s < 2) {
         return seed();
     } else {
@@ -56,11 +56,14 @@ function seed() {
 }
 
 function bbs(n) {
-    // Blum Blum Shub CSPRNG
-    // Max int = 2^53 == (2^26)*(2^27)
+    // Blum Blum Shub cryptographically secure PRNG
+    // See https://en.wikipedia.org/wiki/Blum_Blum_Shub
     var a = new Uint32Array(n);
-    var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,26))-1); //odd
-    var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,27))-1); //odd
+    // Max int = 2^53 == (2^26)*(2^27) -> (2^s1)*(2^s2)
+    var s1 = Math.floor(Math.random()*2)+26; // first power, 26 or 27
+    var s2 = 53-s1; // second power
+    var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,s1))-1); //odd
+    var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,s2))-1); //odd
     var s = seed();
 
     // s should be coprime to p*q
