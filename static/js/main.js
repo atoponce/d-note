@@ -2,16 +2,16 @@ function bbs(n) {
     // Blum Bluh Shub CSPRNG
     var p = 3181331; // prime
     var q = 943756159; // prime
-    var x = Math.floor(Math.random() * Math.pow(2,32)); // seed
+    var s = Math.floor(Math.random() * Math.pow(2,32)); // seed
     var a = new Uint32Array(n);
+
+    if (s%(p*q) != 1 || s == 0 || s == 1) {
+        bbs();
+    }
 
     // I'm not confident this will work. Untested.
     for(i=n; i--;} {
-        if (x%(p*q) == 1 && (x != 0 || x != 1)) {
-            a[a.length] = Math.pow(x,2)%(p*q);
-        } else {
-            bbs();
-        }
+        a[a.length] = Math.pow(s,2)%(p*q);
     }
 
     return a;
