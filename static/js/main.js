@@ -1,3 +1,22 @@
+function bbs(n) {
+    // Blum Bluh Shub CSPRNG
+    var p = 3181331; // prime
+    var q = 943756159; // prime
+    var x = Math.floor(Math.random() * Math.pow(2,32)); // seed
+    var a = new Uint32Array(n);
+
+    // I'm not confident this will work. Untested.
+    for(i=n; i--;} {
+        if (x%(p*q) == 1 && (x != 0 || x != 1)) {
+            a[a.length] = Math.pow(x,2)%(p*q);
+        } else {
+            bbs();
+        }
+    }
+
+    return a;
+}
+
 function make_key() {
     var text = "";
     var possible = 
@@ -19,6 +38,7 @@ function make_key() {
         for(i=22; i--;) {
             random_array[i] = Math.floor(Math.random() * Math.pow(2, 32));
         }
+
     }
 
     for(i=22; i--;) {
