@@ -1,7 +1,3 @@
-function build_pass(arr) {
-    return text
-}
-
 function make_key() {
     var text = "";
     var possible = 
