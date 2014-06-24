@@ -47,11 +47,12 @@ function gcd(x, y) {
 } 
 
 function seed() {
-    var s = Math.floor(Math.random() * Math.pow(2,32));
+    var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1;
     if(s == 0 || s == 1) {
-        seed();
+        return seed();
+    } else {
+        return s;
     }
-    return s;
 }
 
 function bbs(n) {
