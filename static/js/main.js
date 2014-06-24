@@ -1,5 +1,5 @@
 function bbs(n) {
-    // Blum Bluh Shub CSPRNG
+    // Blum Blum Shub CSPRNG
     var p = 3181331; // prime
     var q = 943756159; // prime
     var s = Math.floor(Math.random() * Math.pow(2,53)); // seed
