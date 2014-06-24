@@ -6,7 +6,7 @@ function bbs(n) {
     var a = new Uint32Array(n);
 
     if (s%(p*q) != 1 || s == 0 || s == 1) {
-        bbs();
+        bbs(n);
     }
 
     // I'm not confident this will work. Untested.
