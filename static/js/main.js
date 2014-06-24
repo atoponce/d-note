@@ -1,17 +1,35 @@
+function gcd(x, y) {
+    if (!y) {
+        return x;
+    }
+
+    return gcd(y, x%y);
+} 
+
+function seed() {
+    var s = Math.floor(Math.random() * Math.pow(2,32));
+    if (s == 0 || s == 1) {
+        seed();
+    }
+    return s
+}
+
 function bbs(n) {
     // Blum Blum Shub CSPRNG
     var p = 3181331; // prime
     var q = 943756159; // prime
-    var s = Math.floor(Math.random() * Math.pow(2,53)); // seed
     var a = new Uint32Array(n);
+    var s = seed();
 
-    if (s%(p*q) != 1 || s == 0 || s == 1) {
-        bbs(n);
+    // s should be coprime to p*q
+    //while(s%(p*q) != 1) {
+    while(gcd(p*q, s) != 1) {
+        s = seed();
     }
 
-    // I'm not confident this will work. Untested.
     for(i=n; i--;) {
-        a[a.length] = Math.pow(s,2)%(p*q);
+        s = Math.pow(s,2)%(p*q);
+        a[i] = s;
     }
 
     return a;
@@ -35,10 +53,7 @@ function make_key() {
     }
     else {
         // Android browser, IE Mobile, Opera Mobile, older desktop browsers
-        for(i=22; i--;) {
-            random_array[i] = Math.floor(Math.random() * Math.pow(2, 32));
-        }
-
+      random_array = bbs(22);
     }
 
     for(i=22; i--;) {
