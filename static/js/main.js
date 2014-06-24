@@ -1,10 +1,34 @@
+function build_pass(arr) {
+    return text
+}
+
 function make_key() {
     var text = "";
     var possible = 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    for(i=22; i--;) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    random_array = Uint32Array(22);
+
+    // Make some attempt at preferring a strong CSPRNG first
+    if (window.crypto && window.crypto.getRandomValues) {
+        // Desktop Chrome 11.0, Firefox 21.0, Opera 15.0, Safari 3.1
+        // Mobile Chrome 23, Firefox 21.0, iOS 6
+        window.crypto.getRandomValues(random_array);
     }
+    else if (window.msCrypto && window.msCrypto.getRandomValues) {
+        // IE 11
+        window.msCrypto.getRandomValues(random_array);
+    }
+    else {
+        // Android browser, IE Mobile, Opera Mobile, older desktop browsers
+        for(i=22; i--;) {
+            random_array[i] = Math.floor(Math.random() * Math.pow(2, 32));
+        }
+    }
+
+    for(i=22; i--;) {
+        text += possible.charAt(Math.floor(random_array[i] % possible.length));
+    }
+
     return text;
 }
 
