@@ -48,7 +48,7 @@ function gcd(x, y) {
 
 function seed() {
     var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1;
-    if(s == 0 || s == 1) {
+    if(s < 2) {
         return seed();
     } else {
         return s;
