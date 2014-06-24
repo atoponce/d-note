@@ -10,7 +10,7 @@ function bbs(n) {
     }
 
     // I'm not confident this will work. Untested.
-    for(i=n; i--;} {
+    for(i=n; i--;) {
         a[a.length] = Math.pow(s,2)%(p*q);
     }
 
