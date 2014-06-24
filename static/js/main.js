@@ -2,7 +2,7 @@ function bbs(n) {
     // Blum Bluh Shub CSPRNG
     var p = 3181331; // prime
     var q = 943756159; // prime
-    var s = Math.floor(Math.random() * Math.pow(2,32)); // seed
+    var s = Math.floor(Math.random() * Math.pow(2,53)); // seed
     var a = new Uint32Array(n);
 
     if (s%(p*q) != 1 || s == 0 || s == 1) {
