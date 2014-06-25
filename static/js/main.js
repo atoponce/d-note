@@ -123,7 +123,7 @@ function make_key() {
     var text = "";
     var possible = 
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    random_array = new Uint32Array(22);
+    var random_array = new Uint32Array(22);
 
     // Always prefer a cryptographically strong PRNG
     if(window.crypto && window.crypto.getRandomValues) {
