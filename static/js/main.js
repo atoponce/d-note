@@ -16,6 +16,7 @@ function modPow(a,b,n){
 
 function isPrime(n){
     // Miller-Rabin primality test taken from
+    // O(k*log(n)^3) worst case, given k-accuracy
     // http://rosettacode.org/wiki/Miller-Rabin_primality_test#JavaScript
     if(n==2||n==3||n==5) return true;
     if(n%2==0||n%3==0||n%5==0) return false;
@@ -33,18 +34,49 @@ function isPrime(n){
 }
 
 function random_prime(n) {
-    while(!isPrime(n)) {
-        n -= 2;
-    }
+    while(!isPrime(n)) n -= 2;
     return n;
 }
 
 function gcd(x, y) {
-    if(!y) {
-        return x;
-    }
+    if(!y) return x;
     return gcd(y, x%y);
 } 
+
+function totient(n) {
+    // compute Euler's totient function
+    // O(sqrt(n)/3) worst case
+    // Taken from:
+    // https://en.wikipedia.org/wiki/Talk:Euler%27s_totient_function#C.2B.2B_Example
+    if(n < 2) return n;
+    var phi = n;
+    if (n % 2 == 0) {
+        phi /= 2;
+        n /= 2;
+        while(n % 2 == 0) n /= 2;
+    }
+    if (n % 3 == 0) {
+        phi -= phi/3;
+        n /= 3;
+        while(n % 3 == 0) n /= 3;
+    }
+    for(p = 5; p * p <= n;) {
+        if(n % p == 0) {
+            phi -= phi/p;
+            n /= p;
+            while(n % p == 0) n /= p;
+        }
+        p += 2;
+        if(p * p > n) break;
+        if(n % p == 0) {
+            phi -= phi/p;
+            n /= p;
+            while(n % p == 0) n /= p;
+        }
+    }
+    if(n > 1) phi -= phi/n;
+    return phi;
+}
 
 function seed() {
     var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1; //odd
@@ -59,12 +91,20 @@ function bbs(n) {
     // Blum Blum Shub cryptographically secure PRNG
     // See https://en.wikipedia.org/wiki/Blum_Blum_Shub
     var a = new Uint32Array(n);
-    // Max int = 2^53 == (2^26)*(2^27) -> (2^s1)*(2^s2)
-    var s1 = Math.floor(Math.random()*2)+26; // first power, 26 or 27
-    var s2 = 53-s1; // second power
-    var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,s1))-1); //odd
-    var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,s2))-1); //odd
+    // Max int = 2^53 == (2^26)*(2^27) -> (2^p1)*(2^p2)
+    var p1 = Math.floor(Math.random()*2)+25; // first power, 26 or 27
+    var p2 = 51-p1; // second power
+    var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,p1))-1);
+    var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,p2))-1);
     var s = seed();
+
+    // Ensure each quadratic residue has one square root which is also quadratic
+    // residue. Also, gcd(totient(p-1),totient(q-1)) should be small to ensure a
+    // large cycle length.
+    while(p%4 != 3 || q%4 != 3 || gcd(totient(p-1),totient(q-1)) >= 5) {
+        p = random_prime(2*Math.floor(Math.random() * Math.pow(2,p1))-1);
+        q = random_prime(2*Math.floor(Math.random() * Math.pow(2,p2))-1);
+    }
 
     // s should be coprime to p*q
     while(gcd(p*q, s) != 1) {
@@ -85,7 +125,7 @@ function make_key() {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     random_array = new Uint32Array(22);
 
-    // Prefer a cryptographically strong PRNG
+    // Always prefer a cryptographically strong PRNG
     if(window.crypto && window.crypto.getRandomValues) {
         // Desktop Chrome 11.0, Firefox 21.0, Opera 15.0, Safari 3.1
         // Mobile Chrome 23, Firefox 21.0, iOS 6
