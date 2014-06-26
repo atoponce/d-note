@@ -108,7 +108,7 @@ function bbs(n) {
 function shuffle(a) {
     // Fisher-Yates shuffle. Runs in O(n).
     // Takes an array as an argument.
-    var i = array.length;
+    var i = a.length;
     var j = null;
     var t = null;
     while(i) {
