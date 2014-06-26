@@ -141,7 +141,7 @@ function make_key() {
     }
 
     for(i=22; i--;) {
-        text += possible.charAt(Math.floor(random_array[i] % possible.length));
+        text += possible.charAt(random_array[i] % possible.length);
     }
 
     return text;
