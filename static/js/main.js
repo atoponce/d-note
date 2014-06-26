@@ -46,8 +46,7 @@ function gcd(x, y) {
 function totient(n) {
     // compute Euler's totient function
     // O(sqrt(n)/3) worst case
-    // Taken from:
-    // https://en.wikipedia.org/wiki/Talk:Euler%27s_totient_function#C.2B.2B_Example
+    // See: https://en.wikipedia.org/wiki/Talk:Euler%27s_totient_function
     if(n < 2) return n;
     var phi = n;
     if (n % 2 == 0) {
@@ -79,72 +78,66 @@ function totient(n) {
 }
 
 function seed() {
-    var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1; //odd
-    if(s < 2) {
-        return seed();
-    } else {
-        return s;
-    }
+    var s = 2*Math.floor(Math.random() * Math.pow(2,31))-1;
+    if(s < 2) return seed();
+    else return s;
 }
 
 function bbs(n) {
     // Blum Blum Shub cryptographically secure PRNG
     // See https://en.wikipedia.org/wiki/Blum_Blum_Shub
-    var a = new Uint32Array(n);
     // Max int = 2^53 == (2^26)*(2^27) -> (2^p1)*(2^p2)
+    var a = new Uint32Array(n);
     var p1 = Math.floor(Math.random()*2)+25; // first power, 26 or 27
     var p2 = 51-p1; // second power
     var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,p1))-1);
     var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,p2))-1);
     var s = seed();
-
-    // Ensure each quadratic residue has one square root which is also quadratic
-    // residue. Also, gcd(totient(p-1),totient(q-1)) should be small to ensure a
-    // large cycle length.
     while(p%4 != 3 || q%4 != 3 || gcd(totient(p-1),totient(q-1)) >= 5) {
         p = random_prime(2*Math.floor(Math.random() * Math.pow(2,p1))-1);
         q = random_prime(2*Math.floor(Math.random() * Math.pow(2,p2))-1);
     }
-
-    // s should be coprime to p*q
-    while(gcd(p*q, s) != 1) {
-        s = seed();
-    }
-
+    while(gcd(p*q, s) != 1) s = seed();
     for(i=n; i--;) {
         s = Math.pow(s,2)%(p*q);
         a[i] = s;
     }
+    return a;
+}
 
+function shuffle(a) {
+    // Fisher-Yates shuffle. Runs in O(n).
+    // Takes an array as an argument.
+    var i = array.length;
+    var j = null;
+    var t = null;
+    while(i) {
+        j = Math.floor(Math.random() * i--);
+        t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
     return a;
 }
 
 function make_key() {
-    var text = "";
-    var possible = 
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    var random_array = new Uint32Array(22);
-
-    // Always prefer a cryptographically strong PRNG
+    // Cryptographically strong key generator.
+    // Use the Web Crypto API by default, then fall back to Blum Blum Shub
+    // See: http://www.w3.org/TR/WebCryptoAPI/
+    var size = 22;
+    var key = "";
+    var s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    var shuf_arr = shuffle(s.split(''));
+    var random_array = new Uint32Array(size);
     if(window.crypto && window.crypto.getRandomValues) {
-        // Desktop Chrome 11.0, Firefox 21.0, Opera 15.0, Safari 3.1
-        // Mobile Chrome 23, Firefox 21.0, iOS 6
         window.crypto.getRandomValues(random_array);
     }
     else if(window.msCrypto && window.msCrypto.getRandomValues) {
-        // IE 11
         window.msCrypto.getRandomValues(random_array);
     }
-    else {
-        // Android browser, IE Mobile, Opera Mobile, other browsers
-        random_array = bbs(22);
-    }
-
-    for(i=22; i--;) {
-        text += possible.charAt(random_array[i] % possible.length);
-    }
-
-    return text;
+    else random_array = bbs(size);
+    for(i=size; i--;) key += shuf_arr[random_array[i] % shuf_arr.length];
+    return key;
 }
 
 function please_wait() {
