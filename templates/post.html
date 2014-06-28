@@ -15,21 +15,21 @@
             <span class="nav"><a class="destroy" href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Destroy note</a></span>
 {% endblock%}
 {% block content %}
-    <p><u>Your private url:</u>
+    <p><b>Your private url:</b>
         <span class="mono">{{ url_for('fetch_url', random_url=random, _external=True) }}</span>
     </p>
-    <p><u>Your private ID:</u>
+    <p><b>Your private ID:</b>
         <span class="mono">{{ random }}</span>
         <!-- do not wrap at 80-characters. the hover text breaks -->
         <span class="tooltip" title="For plausible deniability, provide just the private ID to the note, rather than the full URL.">&nbsp;?&nbsp;</span>
     </p>
     {% if passphrase %}
-    <p><u>Your passphrase:</u>
+    <p><b>Your passphrase:</b>
         <span class="mono">{{ passphrase}}</span>
     </p>
     {% endif %}
     {% if duress %}
-    <p><u>Your duress key:</u>
+    <p><b>Your duress key:</b>
         <span class="mono">{{ duress }}</span>
         <!-- do not wrap at 80-characters. the hover text breaks -->
         <span class="tooltip" title="A  key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.">&nbsp;?&nbsp;</span>
