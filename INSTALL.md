@@ -17,13 +17,14 @@ Now make a directory under your web root to clone the Git repository:
 
 Configuration
 -------------
-Make sure you change the configuration found in /var/www/dnote/dnote.py as
-necessary. The three salts listed in that configuration should be changed. You
-can run the following Python code to generate those salts:
+Run the following from a terminal to setup the configuration file and data
+storage directory before launching the application:
 
-    >>> from Crypto import Random
-    >>> for salt in range(3):
-    ...     print Random.new().read(16).encode(&#39;hex&#39;)
+    $ python setup.py
+
+This will create a `dconfig.py` which should have salts with random hexadecimal
+strings as their values, and should create a `/data` direcory to store the
+notes.
 
 Apache Setup
 ------------

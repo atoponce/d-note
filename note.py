@@ -12,16 +12,8 @@ from Crypto.Util import Counter
 try:
     import dconfig
 except ImportError:
-    with open('dconfig.py', 'w') as f:
-        f.write('aes_salt = "%s"\n' % Random.new().read(16).encode('hex'))
-        f.write('mac_salt = "%s"\n' % Random.new().read(16).encode('hex'))
-        f.write('nonce_salt = "%s"\n' % Random.new().read(16).encode('hex'))
-        f.write('duress_salt = "%s"\n' % Random.new().read(16).encode('hex'))
-    import dconfig
-
-DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
+    print "You need to run 'python setup.py' as part of the installation."
+    os.sys.exit(1)
 
 class Note(object):
     """Note Model"""
