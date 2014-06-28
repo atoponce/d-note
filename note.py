@@ -6,7 +6,6 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC, SHA512
 from Crypto.Protocol import KDF
-from Crypto.Random import random
 from Crypto.Util import Counter
 
 try:
@@ -14,6 +13,8 @@ try:
 except ImportError:
     print "You need to run 'python setup.py' as part of the installation."
     os.sys.exit(1)
+
+DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
 
 class Note(object):
     """Note Model"""
@@ -109,7 +110,8 @@ class Note(object):
 
         rand = Random.new()
         for kind in (None, 'key', 'dkey'):
-            if not os.path.exists(self.path(kind)): continue
+            if not os.path.exists(self.path(kind)):
+                continue
             with open(self.path(kind), "r+") as note:
                 for char in xrange(os.stat(note.name).st_size):
                     note.seek(char)
@@ -120,14 +122,15 @@ class Note(object):
         """Encrypt a plaintext to a URI file.
 
         All files are encrypted with AES in CTR mode. HMAC-SHA512 is used
-        to provide authenticated encryption ( encrypt then mac ). No private keys
-        are stored on the server."""
-        
-        plain = zlib.compress(self.plaintext.encode('utf-8')) 
+        to provide authenticated encryption ( encrypt then mac ). No private
+        keys are stored on the server."""
+
+        plain = zlib.compress(self.plaintext.encode('utf-8'))
         with open(self.path(), 'w') as note:
             init_value = Random.new().read(12) # 96-bits
-            ctr = Counter.new(128, initial_value = long(init_value.encode('hex'), 16))
-            aes = AES.new(self.aes_key, AES.MODE_CTR, counter = ctr)
+            ctr = Counter.new(128,
+                              initial_value=long(init_value.encode('hex'), 16))
+            aes = AES.new(self.aes_key, AES.MODE_CTR, counter=ctr)
             ciphertext = aes.encrypt(plain)
             ciphertext = init_value + ciphertext
             hmac = HMAC.new(self.mac_key, ciphertext, SHA512)
@@ -154,6 +157,6 @@ class Note(object):
             hmac_check |= ord(char1) ^ ord(char2)
         if hmac_check == 0:
             self.plaintext = zlib.decompress(plaintext).decode('utf-8')
-        else: 
+        else:
             return False
         return True

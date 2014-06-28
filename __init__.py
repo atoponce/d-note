@@ -64,19 +64,19 @@ def fetch_url(random_url):
 
     if not note.exists():
         return render_template('404.html'), 404
-    elif not note.decrypt() and request.method !='POST':
-        return render_template('key.html', random = note.url)
+    elif not note.decrypt() and request.method != 'POST':
+        return render_template('key.html', random=note.url)
     elif request.method == 'POST':
         passphrase = request.form['pass']
         note.set_passphrase(passphrase)
         if passphrase == note.dkey:
             note.secure_remove()
-            return render_template('note.html', text = utils.duress_text())
+            return render_template('note.html', text=utils.duress_text())
     if note.decrypt():
         note.secure_remove()
-        return render_template('note.html', text = note.plaintext)
+        return render_template('note.html', text=note.plaintext)
     else:
-        return render_template('keyerror.html', random = note.url)
+        return render_template('keyerror.html', random=note.url)
 
 if __name__ == '__main__':
     DNOTE.debug = True
