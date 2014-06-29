@@ -1,8 +1,19 @@
 body {
-    margin: 20px 300px;
+    color: #495057;
+    margin: 0;
+    padding: 0;
+    font-family: Arial;
+    font-size: 14px;
 }
 
 #content {
+    margin: 0 auto;
+    padding-top: 15px;
+    width: 950px;
+}
+
+h1 {
+    font-size: 25px;
 }
 
 #section {
@@ -17,8 +28,21 @@ body {
     margin: 0 20px;
 }
 
-.nav {
-    margin-right: 25px;
+#header {
+    padding-top: 15px;
+    position: relative;
+}
+
+#nav {
+    margin: 0 auto;
+    padding: 0;
+    width: 950px;
+}
+
+#nav li {
+    display: inline;
+    list-style-type: none;
+    margin-right:1em;
 }
 
 .nav .destroy:link{
@@ -26,20 +50,78 @@ body {
 }
 
 .tooltip {
-    background: #c9c9c9;
-    border-radius: 20px;
-    color: white;
-    cursor: help;
-    font-size: 12px;
+    display:inline-block;
+    position:relative;
+}
+
+.tooltip .popup {
+    bottom: -5px; 
+    color: #ffffee;
+    font-size: 1px;
+    left: 32px; 
+    max-height: 220px;
+    opacity: 0; 
+    overflow: hidden; 
+    position: absolute; 
+    text-align: left;
+    transition: all ease-in 0.2s;
+    width: 0; 
+}
+
+.tooltip .trigger { 
+    background: #c5c5c5; 
+    border-radius: 20px; 
+    color: white; 
+    display: inline-block; 
     font-weight: bold;
-    margin-left: 5x;
-    padding: 0px 4px;
+    margin-left: 5px;
+    padding: 0 6px;
 }
 
 .tooltip:hover {
+    cursor: help;
+}
+
+.tooltip:hover .popup {
+    background: #ffffee;
+    border-radius: 3px;
+    border: 1px solid #aaa;
+    box-shadow: 1px 1px 6px #ddd;
+    color: #444;
+    font-size: 14px;
+    line-height: 150%;
+    opacity: 1;
+    padding: 6px 12px;
+    transition: all ease-out 0.2s;
+    width: 220px;
+    z-index: 1;
+}
+
+.tooltip:hover .trigger {
     background: #a1a4c9;
 }
 
 .mono {
     font-family: Andale Mono, monospace;
+}
+
+.blockfirst {
+    border-right: 2px solid #ccc;
+    float: left;
+    padding-top: 6px;
+    text-align: center;
+    width: 52%;
+}
+
+
+.blocklast {
+    float: left;
+    padding-top: 6px;
+    text-align: center;
+    width: 46%;
+}
+
+#progress {
+    color: #888888;
+    font-style: italic;
 }

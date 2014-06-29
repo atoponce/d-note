@@ -2,62 +2,42 @@
 <html>
     <head>
         <title>{% block title %}{% endblock %}</title>
-        <meta http-equiv="Cache-Control" content="no-cache, no-store,
-        must-revalidate"/>
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
         <meta http-equiv="Pragma" content="no-cache" />
         <meta http-equiv="Expires" content="0" />
-        <link rel="stylesheet" type="text/css" href="{{ url_for('index')
-        }}static/css/main.css"/>
-        <script type="application/javascript" src="{{ url_for('index')
-        }}static/js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('index') }}static/css/main.css"/>
+        <script type="text/javascript" src="{{ url_for('index') }}static/js/main.js"></script>
+        <noscript>
+            <style>#content{display: none;}</style>
+            <style>#header{display: none;}</style>
+        </noscript>
         {% block head %}
         {% endblock %}
     </head>
     <body>
         <div id="header">
-            <span class="nav"><a href="{{ url_for('index') }}">New
-            Note</a></span>
-            <span class="nav"><a href="{{ url_for('security')
-            }}">Security</a></span>
-            <span class="nav"><a href="{{ url_for('faq') }}">FAQ</a></span>
-            <span class="nav"><a href="{{ url_for('about') }}">About</a></span>
-            {% block destroy %}{% endblock %}
+            <ul id="nav">
+                <li><a href="{{ url_for('index') }}">New Note</a></li>
+                <li><a href="{{ url_for('security') }}">Security</a></li>
+                <li><a href="{{ url_for('faq') }}">FAQ</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+            </ul>
         </div>
         <div id="content">
             {% block content %}{% endblock %}
-            <noscript>
-                <p>You currently have JavaScript disabled. JavaScript is
-                required to use this website. Here is all the JavaScript code
-                that is executed:</p>
-                <ul>
-                    <li><a href="http://hashcash.org">Hashcash</a>- Hashcash
-                    tokens are minted when submitting a note to prevent denial
-                    of service POST attacks and to prevent spamming.</li>
-                    <li><a
-                    href="https://github.com/Valve/fingerprintjs">Fingerprinting</a>-
-                    As part of Hashcash tokens, an anonymous <a
-                    href="http://en.wikipedia.org/wiki/MurmurHash">MurmurHash</a>
-                    resource string is calculated.</li>
-                    <li><a href="http://davidshimjs.github.io/qrcodejs/">QR Code
-                    Generation</a>- A QR Code is generated for sending to the
-                    recipient to scan using their mobile device to read the
-                    note.</li>
-                    <li>Notifications- When posting a note, JavaScript is used
-                    to let you know that while you are posting your note, a
-                    Hashcash token is being minted.</li>
-                    <li>Redirects- When viewing a note, JavaScript is used to
-                    redirect your browser after a timeout.</li>
-                </ul>
-                <p>There is no tracking code, such as analytics, cookies, etc.
-                in the <a href="https://github.com/atoponce/d-note">default
-                source code</a>. If this site administrator has installed
-                tracking code, I recommend installing the <a
-                href="http://www.ghostery.com/">Ghostery</a> and the <a
-                href="https://adblockplus.org">Adblock Plus</a> extensions,
-                which are both available for Google Chrome and Mozilla Firefox
-                browsers.</p>
-            </noscript>
         </div>
         <div id="footer"></div>
+        <noscript>
+           <p>You currently have JavaScript disabled. JavaScript is required to use this website. Here is all the JavaScript code that is executed:</p>
+            <ul>
+                <li><a href="http://hashcash.org">Hashcash</a>- Hashcash tokens are minted when submitting a note to prevent denial of service POST attacks and to prevent spamming.</li>
+                <li><a href="https://github.com/Valve/fingerprintjs">Fingerprinting</a>- As part of Hashcash tokens, an anonymous <a href="http://en.wikipedia.org/wiki/MurmurHash">MurmurHash</a> resource string is calculated.</li>
+                <li><a href="http://davidshimjs.github.io/qrcodejs/">QR Code Generation</a>- A QR Code is generated for sending to the recipient to scan using their mobile device to read the note.</li>
+                <li>Notifications- When posting a note, JavaScript is used to let you know that while you are posting your note, a Hashcash token is being minted.</li>
+                <li>Redirects- When viewing a note, JavaScript is used to redirect your browser after a timeout.</li>
+                <li>Password Generation- To help you encrypt your note, an optional input field allows you to create a custom passphrase.</li>
+            </ul>
+            <p>There is no tracking code, such as analytics, cookies, etc.  in the <a href="https://github.com/atoponce/d-note">default source code</a>. If this site administrator has installed tracking code, I recommend installing the <a href="https://www.eff.org/privacybadger">Privacy Badger</a> and the <a href="https://adblockplus.org">Adblock Plus</a> extensions, which are both available for Google Chrome and Mozilla Firefox browsers.</p>
+        </noscript> 
     </body>
 </html>

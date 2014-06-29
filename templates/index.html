@@ -8,6 +8,7 @@
 {% endblock %}
 {% block content %}
     <h1>Self destructing encrypted notes</h1>
+    <p>Securely send PINs, messages, passwords, or other sensitive or private information. All notes are encrypted and destroyed immediately after viewing.</p>
     <form method="POST" onsubmit="return validate_form()" action="{{ url_for('show_post', _external=True) }}">
         {% if error %}
             <p class="error">
@@ -17,14 +18,29 @@
             </p>
         {% endif %}
         <input name="new_url" type="hidden" value="{{ random }}">
-        <p>Create a new secret note below:</p>
+        <p>Type or paste your text below:</p>
         <textarea style="width:100%; height:250px" id="paste" name="paste"></textarea>
         <br/>
-        Passphrase (optional): <input style="font-family:monospace; width:250px;" type="text" name="pass" id="passphrase">
-        <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
-        <br/>
-        <input type="hidden" id="hashcash" name="hashcash">
-        <input type="submit" id="submit" value="Submit">
-        <span id="progress">(Please be patient while token is calculated.)</span>
+        <div class="blockfirst">
+            Enter optional passphrase / password:
+            <span class="tooltip">
+                <span class="trigger">?</span>
+                <span class="popup">This passphrase will encrypt and decrypt your note, rather than the one created by the server.</span>
+            </span>
+            <br/>
+            <input id="passphrase" type="text" name="pass" id="passphrase">
+            <input type="button" value="Generate" onclick="document.getElementById('passphrase').value = make_key()">
+        </div>
+        <div class="blocklast">
+            <input type="hidden" id="hashcash" name="hashcash">
+            <div id="submitButnHolder">
+                <input type="submit" id="submit" value="Submit">
+            </div>
+            <span id="progress">(Please be patient)</span>
+            <span class="tooltip">
+                <span class="trigger">?</span>
+                <span class="popup">A puzzle is solved in your browser proving you are human. The puzzle should be solven in a few seconds at most depending on your hardware.</span>
+            </span>
+        </div>
     </form>
 {% endblock %}

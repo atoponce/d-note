@@ -1,24 +1,11 @@
 {% extends "base.html" %}
 {% block title %}About - Self Destructing Notes{% endblock %}
 {% block content %}
+    <h1>About This Server</h1>
     <p class="title">Free and Open Source Software</p>
-    <p class="desc"><a href="https://github.com/atoponce/d-note">d-note</a> is a
-    Free and Open Source Python web application written in Flask. It is licensed
-    under the GNU Affero General Public License v3, and is available for you to
-    host on your own server.</p>
+    <p class="desc"><a href="https://github.com/atoponce/d-note">d-note</a> is a Free and Open Source Python web application written in Flask. It is licensed under the GNU Affero General Public License v3, and is available for you to host on your own server.</p>
     <p class="title">What is it?</p>
-    <p class="desc">It is a platform for sending secure messages that
-    self-destruct immediately after being read. Unread messages are
-    automatically deleted after 30 days. As such, this application is suitable
-    for sending private information such as PINs, usernames, passwords, and
-    other sensitive information over insecure channels.</p>
+    <p class="desc">It is a platform for sending secure messages that self-destruct immediately after being read. Unread messages are automatically deleted after 30 days. As such, this application is suitable for sending private information such as PINs, usernames, passwords, and other sensitive information over insecure channels.</p>
     <p class="title">Security</p>
-    <p class="desc">All notes are encrypted on the server, and decrypted when
-    the recipient views the note. The note can only be viewed once, and the note
-    is securely destroyed on the server by overwriting the note with random data
-    before deletion. Private passwords can be used to encrypt the note, instead
-    of using the default server password. Private passwords are never stored on
-    disk. In addition to private passwords, duress keys can be generated which
-    will immediately destroy the note without decrypting it, in case you are
-    being forced to provide the private password that decrypts the note.</p>
+    <p class="desc">All notes are encrypted on the server, and decrypted when the recipient views the note. The note can only be viewed once, and the note is securely destroyed on the server by overwriting the note with random data before deletion. Private passwords can be used to encrypt the note, instead of using the default server password. Private passwords are never stored on disk. In addition to private passwords, duress keys can be generated which will immediately destroy the note without decrypting it, in case you are being forced to provide the private password that decrypts the note.</p>
 {% endblock %}
