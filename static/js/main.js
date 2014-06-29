@@ -88,7 +88,7 @@ function bbs(n) {
     // See https://en.wikipedia.org/wiki/Blum_Blum_Shub
     // Max int = 2^53 == (2^26)*(2^27) -> (2^p1)*(2^p2)
     var a = new Uint32Array(n);
-    var p1 = Math.floor(Math.random()*2)+25; // first power, 26 or 27
+    var p1 = Math.floor(Math.random()*2)+25; // first power, 25 or 26
     var p2 = 51-p1; // second power
     var p = random_prime(2*Math.floor(Math.random() * Math.pow(2,p1))-1);
     var q = random_prime(2*Math.floor(Math.random() * Math.pow(2,p2))-1);
