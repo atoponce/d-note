@@ -127,8 +127,14 @@ h1 {
 }
 
 #qrcode {
-    height:0px; 
-    opacity:0;
-    overflow:hidden;
-    transition:all linear 0.2s;
+    height: 0px; 
+    opacity: 0;
+    overflow: hidden;
+    transition: all linear 0.2s;
+}
+
+#passphrase {
+    font-family: Andale Mono, monospace;
+    text-align: center;
+    width: 200px;
 }
