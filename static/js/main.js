@@ -15,9 +15,9 @@ function modPow(a,b,n){
 }
 
 function isPrime(n){
-    // Miller-Rabin primality test taken from
+    // Miller-Rabin primality test
     // O(k*log(n)^3) worst case, given k-accuracy
-    // http://rosettacode.org/wiki/Miller-Rabin_primality_test#JavaScript
+    // See: http://rosettacode.org/wiki/Miller-Rabin_primality_test#JavaScript
     if(n==2||n==3||n==5) return true;
     if(n%2==0||n%3==0||n%5==0) return false;
     if(n<25) return true;
