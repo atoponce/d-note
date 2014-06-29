@@ -4,6 +4,7 @@
     <h1>FAQ</h1>
     <ul>
         <li><a href="#storage">How are notes stored on the server?</a></li>
+        <li><a href="#client">Why not use client-side encryption with JavaScript?</a></li>
         <li><a href="#aes">How secure is AES-256 encryption?</a></li>
         <li><a href="#sending">How can I send my note?</a></li>
         <li><a href="#undo">How do I undo sending a note?</a></li>
@@ -18,42 +19,47 @@
         <li><a href="#sharing">Are you sharing my data with the NSA, MI6, KGB, etc.?</a></li>
     </ul>
 
-    <p class="title"id="storage">How are notes stored on the server?</p>
-    <p class="desc">All notes are first compressed using <a href="https://en.wikipedia.org/wiki/Zlib">zlib</a>. Data compressed with zlib provides good compression ratios with minimal system resources. After the note is compressed, it is then encrypted with the <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES-256 cipher</a> using CTR mode. Part of the encryption includes using <a href="https://en.wikipedia.org/wiki/HMAC">HMAC-SHA512</a> to maintain data integrity and authentication of the encrypted message. The keys used are not stored in disk, and instead are part of the URL. After the note has been encrypted, it is then stored on disk.</p>
+    <p class="title" id="storage">How are notes stored on the server?</p>
+    <p class="desc">All notes are first compressed using <a href="https://en.wikipedia.org/wiki/Zlib">zlib</a>. Data compressed with zlib provides good compression ratios with minimal system resources. After the note is compressed, it is then encrypted with the <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES-256 cipher</a> using CTR mode. Part of the encryption includes using <a href="https://en.wikipedia.org/wiki/HMAC">HMAC-SHA512</a> to maintain data integrity and authentication of the encrypted message. The keys used are not stored in disk, and instead are part of the URL. After the note has been encrypted, it is then stored on disk. All of this is done in RAM on the server.</p>
 
-    <p class="title"id="aes">How secure is AES-256 encryption?</p>
+    <p class="title" id="client">Why not use client-side encryption with Javascript?</p>
+    <p class="desc">First, JavaScript does not support very large integers when it comes to encryption. The maximum integer size in JavaScript is 53-bits. To do encryption properly, you need at least 128-bits, and many times 256-bits of entropy. This means using the <a href="http://www.leemon.com/crypto/BigInt.html">BigInt.js</a> library. This is certainly doable, but it also means that the client must download an additional 50 KB.</p>
+    <p class="desc">Second, JavaScript does not have any built-in cryptographic libraries. As such, we would then need to support a 3rd party JavaScript library. There are a few out there, with <a href="https://code.google.com/p/crypto-js/">CryptoJS</a> probably the most feature complete, and most mature. But, this also means more to download. For AES, PBKDF2, and HMAC-SHA512, that's an additional 25 KB to download at a minumum.</p>
+    <p class="desc">Lastly, the big argument against server-side encryption, is not trusting the service administrator. This is why the project is Free and Open Source Software, so you can host it on your own server. But, even with client-side encryption, people generally aren't going to verify that the server is sending them the correct JavaScript code that will actually do the encryption. So, you must trust that either the note is encrypted server side, without tampering or snooping by the administrator, or you must trust that the server administrator is not sending you dummy JavaScript code to the browser, and you're storing the note in plaintext on the server. Service providers require trust, server-side encryption or client-side.</p>
+
+    <p class="title" id="aes">How secure is AES-256 encryption?</p>
     <p class="desc">AES is based on the Rijndael cipher, and supercedes DES. Currently, there has not been a practical attack on the AES cipher. AES-256 was chosen due to it's fast performance in software and its ability to withstand cryptanalysis over time. It's an industry standard, open block cipher.</p>
 
-    <p class="title"id="sending">How can I send my note?</p>
+    <p class="title" id="sending">How can I send my note?</p>
     <p class="desc">After a note has been created, you will be given a random and unique link that you can send to your intended recipient. You could then send this link via email or instant message. Further, a <a href="https://en.wikipedia.org/wiki/QR_code">QR code</a> is generated that you can scan with a mobile device. This allows you to also send the link via text message easily, or any other communication tool that may be installed on the mobile device..</p>
 
-    <p class="title"id="undo">How do I undo sending a note?</p>
+    <p class="title" id="undo">How do I undo sending a note?</p>
     <p class="desc">If you suspect that you have sent the note to the wrong person, have sent the note prematurely, or just sent the wrong data, you can destroy the note by just visiting the link. Once the note has been viewed, the note is destroyed, and will no longer be available.</p>
 
-    <p class="title"id="multiple">Can I send a note to multiple recipients?</p>
+    <p class="title" id="multiple">Can I send a note to multiple recipients?</p>
     <p class="desc">No, you cannot. This web application is designed for single viewing only. If you want to send a note to multiple recipients, then you must create multiple notes, one for each person.</p>
 
-    <p class="title"id="password">How secure is the private passphrase?</p>
+    <p class="title" id="password">How secure is the private passphrase?</p>
     <p class="desc">Because the note encryption is symmetric cryptography, anyone with the encryption key can decrypt the note, and view its contents. As such, it is critical that the private passphrase be private, only between the sender and the recipient.</p>
 
-    <p class="title"id="duress">What is a duress key?</p>
+    <p class="title" id="duress">What is a duress key?</p>
     <p class="desc">A duress key is a key that is provided when the user who has knowledge of decrypting the note is under coersion by a third party, such as law enforcement. A duress key is separate from a private key, in that a duress key will not decrypt the note. Instead, the duress key will immediately and silently destroy the note, and return 5 random sentences from <a href="http://legacy.python.org/dev/peps/pep-0020/">The Zen of Python</a>. Thus, no knowledge about the note is gained, and because the note has been destroyed, there are no options to take in recovering its contents.</p>
 
-    <p class="title"id="javascript">Why am I forced to use JavaScript?</p>
+    <p class="title" id="javascript">Why am I forced to use JavaScript?</p>
     <p class="desc">This site could run fine without JavaScript. However, when creating a note, a <a href="https://en.wikipedia.org/wiki/hashcash">Hashcash token</a> is minted and submitted to the server for verificaiton. Hashcash tokens are minted to prevent form spam and to prevent brute forcing POST denial of service attacks. JavaScript is also used to create a QR code when the note has been submitted, allowing you to share the note using your mobile device. There is no JavaScript tracking software in the default install of d-note.</p>
 
-    <p class="title"id="hashcash">What is a hashcash token?</p>
+    <p class="title" id="hashcash">What is a hashcash token?</p>
     <p class="desc">A hashcash token is a proof-of-work puzzle that your browser must solve before it can submit the form data. It is built for the sole purpose of fighting spam. Typically, hashcash tokens are used when composing emails. The token is minted by the sender's email client, then put into the headers of the email. The token is computationally expensive for the sender to create. However, when the email is sent, the recipient can verify the token is valid quickly. This implementation of hashcash uses <a href="https://en.wikipedia.org/wiki/Device_fingerprint">browser fingerprints</a> as the resource string to uniquely identify your browser, rather than an email address. This fingerprint is an anonymous 32-bit <a href="https://en.wikipedia.org/wiki/MurmurHash">MurmurHash</a> digest.</p>
 
-    <p class="title"id="fingerprint">What are browser fingerprints?</p>
+    <p class="title" id="fingerprint">What are browser fingerprints?</p>
     <p class="desc">Browser fingerprints are a subset of device fingerprints, where the browser can be uniquely identified with greater than 90% accuracy. Typically, browser fingerprints are used to identify and track users while on websites. A browser fingerprint is calculated by determining the IP address of the user, its screen resolution, installed extensions, plugins, and fonts, and many other factors. All of these factors are pooled together, and hashed using the MurmurHash function. This function returns a 32-bit decimal number, such as "2199570". That number is used as the resource string for the Hashcash token, which is stored on the server to prevent double spending.</p>
 
-    <p class="title"id="secure">How secure is my note really?</p>
+    <p class="title" id="secure">How secure is my note really?</p>
     <p class="desc">Nothing is 100% secure. There are always tradeoffs. Even though I've gone to great lengths to protect your data by default, the system administrator running this application on his server might be careless, or even malicious. As such, if possible, you should host this application on your own web server. Further, you probably should not put all of your eggs in one basket. It is best practice to send usernames to the recipient via one method, and passwords via another. That way, it could be difficult for a single person to collect all of the necessary data. Lastly, if this application is not served over SSL, then packets could be sniffed off the wire, and the contents of the note revealed in plaintext.</p>
 
-    <p class="title"id="backdoors">Are there any backdoors?</p>
+    <p class="title" id="backdoors">Are there any backdoors?</p>
     <p class="desc">No. There are no backdoors in the default source code. Because this application is Free and Open Source Software, you are free to <a href="https://github.com/atoponce/d-note">download and examine the source code</a> yourself, and determine if any backdoors exist.</p>
 
-    <p class="title"id="sharing">Are you sharing my data with the NSA, MI6, KGB, etc.?</p>
+    <p class="title" id="sharing">Are you sharing my data with the NSA, MI6, KGB, etc.?</p>
     <p class="desc">You will need to ask the administrator of the server running this site. There are no backdoors in the default source code, as already mentioned, and nothing is calling home. All network interaction, by default, is communicated strictly between your browser and this server.</p>
 {% endblock %}
