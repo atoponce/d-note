@@ -43,19 +43,21 @@
     {% endif %}
     <p>Alternatively, you can scan this QR code, and "share" it using your mobile device via text message, email, etc. <strong>NOTE:</strong> <a href='https://f-droid.org/repository/browse/?fdid=com.google.zxing.client.android'>ZXing Barcode</a> users: disable "Retrieve more info" from the settings, otherwise your recipient will <strong>NOT</strong> be able to view the post.</p>
     <a id="show_hide" href="#" onclick="toggle('qrcode');">Show QR Code</a>
-    <div id="qrcode" style="display: none;"></div>
+    <div id="qrcode">&nbsp;</div>
     <script type="text/javascript">
         new QRCode(document.getElementById("qrcode"), { text: "{{ url_for('fetch_url', random_url=random, _external=True) }}", correctLevel: QRCode.CorrectLevel.L });
         function toggle(id) {
-            var state = document.getElementById(id).style.display;
+            var state = document.getElementById(id).style.height;
             var text = document.getElementById("show_hide");
-            if (state == 'block') {
-                document.getElementById(id).style.display = 'none';
+            if (state == '300px') {
+                document.getElementById(id).style.height = '0px';
+                document.getElementById(id).style.opacity = '0';
                 text.innerHTML = "Show QR Code";
-            } else {
-                document.getElementById(id).style.display = 'block';
+            } else {
+                document.getElementById(id).style.height = '300px';
+                document.getElementById(id).style.opacity = '1';
                 text.innerHTML = "Hide QR Code";
-            }
-        } 
+            }
+        }
     </script>
 {% endblock %}

@@ -125,3 +125,10 @@ h1 {
     color: #888888;
     font-style: italic;
 }
+
+#qrcode {
+    height:0px; 
+    opacity:0;
+    overflow:hidden;
+    transition:all linear 0.2s;
+}
