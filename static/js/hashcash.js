@@ -11,7 +11,7 @@ function nonce() {
     var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+';
     var randomstring = '';
     for (i=16; i--;) {
-        var rnum = Math.floor(issac.random() * chars.length);
+        var rnum = Math.floor(isaac.random() * chars.length);
         randomstring += chars.substring(rnum,rnum+1);
     }
     return randomstring;
