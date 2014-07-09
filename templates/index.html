@@ -3,7 +3,7 @@
 {% block head %}
     <script type="application/javascript" src="{{ url_for('index') }}static/js/isaac.js"></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/keygen.js"></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js"></script>
+    <script type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js" async></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/sha1-min.js"></script>
     <script type="application/javascript" src="{{ url_for('index') }}static/js/fingerprint-min.js"></script>
     <script type="application/javascript">var fingerprint = new Fingerprint().get();</script>

@@ -4,7 +4,6 @@ function validate_form() {
         return false;
     }
     else {
-        validate_token(fingerprint);
         return true;
     }
 }
