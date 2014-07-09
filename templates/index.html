@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Self Destructing Notes{% endblock %}
 {% block head %}
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/isaac.js"></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/keygen.js"></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js" async></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/sha1-min.js"></script>
-    <script type="application/javascript" src="{{ url_for('index') }}static/js/fingerprint-min.js"></script>
-    <script type="application/javascript">var fingerprint = new Fingerprint().get();</script>
+    <script src="{{ url_for('index') }}static/js/isaac.js"></script>
+    <script src="{{ url_for('index') }}static/js/keygen.js"></script>
+    <script src="{{ url_for('index') }}static/js/sha1-min.js"></script>
+    <script src="{{ url_for('index') }}static/js/fingerprint-min.js"></script>
+    <script>var fingerprint = new Fingerprint().get();</script>
 {% endblock %}
 {% block content %}
     <h1>Self destructing encrypted notes</h1>
@@ -45,4 +44,5 @@
             </span>
         </div>
     </form>
+    <script async onload="validate_token(fingerprint);" type="application/javascript" src="{{ url_for('index') }}static/js/hashcash.js"></script>
 {% endblock %}
