@@ -32,5 +32,3 @@ function mint_token(pre_token) {
     token = pre_token+counter.toString(36);
     return token;
 }
-
-validate_token(fingerprint);
