@@ -13,7 +13,7 @@ Now make a directory under your web root to clone the Git repository:
     # git clone https://github.com/atoponce/d-note.git /var/www/dnote
     # mkdir /var/www/dnote/data/
     # chown root.www-data /var/www/dnote/data
-    # chmod g+w,o= root.www-data /var/www/data/dnote/data
+    # chmod g+w,o= root.www-data /var/www/dnote/data
 
 Configuration
 -------------
@@ -89,7 +89,7 @@ Install uwsgi:
     
 Create a uwsgi.ini file in the directory with the application:
 
-    # touch /var/www/dnote/dnote/uwsgi.ini
+    # touch /var/www/dnote/uwsgi.ini
     
 And add the following to that file (you can tweak these settings as required):
 
@@ -107,8 +107,13 @@ And add the following to that file (you can tweak these settings as required):
     
 You can now start the dnote application by running: 
 
-    # /usr/bin/uwsgi -c /var/www/uwsgi.ini
+    # /usr/bin/uwsgi -c /var/www/dnote/uwsgi.ini
     
+This will start uwsgi in the foreground.  To start it as a
+daemon:
+
+    # /usr/bin/uwsgi -d -c /var/www/dnote/uwsgi.ini
+
 You may want to add this to an init or upstart script, see:
 http://uwsgi-docs.readthedocs.org/en/latest/Management.html
     
@@ -133,3 +138,19 @@ Troubleshooting
 If you are getting any internal service errors make sure to verify that the
 files in /var/www/dnote/dnote are readable by the webserver, and that
 /var/www/dnote/dnote/data/hashcash.db is writable as well.
+
+If you have trouble getting the app to load using uwsgi, try setting up a
+dnote.wsgi file (as in the Apache directions above) and using uwsgi-file
+in the uwsgi.ini file instead of module, like this:
+
+    [uwsgi]
+    socket = /tmp/dnote.sock
+    chdir = /var/www/dnote
+    plugin = python
+    wsgi-file = /var/www/dnote.wsgi
+    processes = 4
+    threads = 2
+    stats = 127.0.0.1:9192
+    uid = www-data
+    gid = www-data
+    logto = /var/log/dnote.log
