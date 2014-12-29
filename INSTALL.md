@@ -23,7 +23,7 @@ storage directory before launching the application:
     $ python setup.py
 
 This will create a `dconfig.py` which should have salts with random hexadecimal
-strings as their values, and should create a `/data` direcory to store the
+strings as their values, and should create a `/data` directory to store the
 notes.
 
 Apache Setup
