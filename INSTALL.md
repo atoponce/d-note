@@ -7,6 +7,9 @@ install `python-flask` and `python-crypto`:
 
     # apt-get install python-flask python-crypto
 
+The correct `python-crypto` package should be coming from
+https://www.dlitz.net/software/pycrypto/
+
 Now make a directory under your web root to clone the Git repository:
 
     # mkdir /var/www/
