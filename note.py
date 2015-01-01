@@ -2,7 +2,6 @@
 import base64
 import os
 import zlib
-from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC, SHA512
 from Crypto.Protocol import KDF
@@ -55,7 +54,7 @@ class Note(object):
             - 256-bits for AES-256 key
             - 512-bits for HMAC-SHA512 key"""
 
-        self.nonce = Random.new().read(16)
+        self.nonce = os.urandom(16)
         self.f_key = KDF.PBKDF2(
             self.nonce, dconfig.nonce_salt.decode("hex"), 16)
         self.aes_key = KDF.PBKDF2(
@@ -108,14 +107,13 @@ class Note(object):
         assumptions about the underlying filesystem, whether it's journaled,
         copy-on-write, or whatever."""
 
-        rand = Random.new()
         for kind in (None, 'key', 'dkey'):
             if not os.path.exists(self.path(kind)):
                 continue
             with open(self.path(kind), "r+") as note:
                 for char in xrange(os.stat(note.name).st_size):
                     note.seek(char)
-                    note.write(str(rand.read(1)))
+                    note.write(str(os.urandom(1)))
             os.remove(self.path(kind))
 
     def encrypt(self):
@@ -127,7 +125,7 @@ class Note(object):
 
         plain = zlib.compress(self.plaintext.encode('utf-8'))
         with open(self.path(), 'w') as note:
-            init_value = Random.new().read(12) # 96-bits
+            init_value = os.urandom(12)
             ctr = Counter.new(128,
                               initial_value=long(init_value.encode('hex'), 16))
             aes = AES.new(self.aes_key, AES.MODE_CTR, counter=ctr)
