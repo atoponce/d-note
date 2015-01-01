@@ -1,6 +1,6 @@
 """Utility functions for d-note."""
+import random
 from Crypto.Hash import SHA
-from Crypto.Random import random
 from note import DATA_DIR
 
 def duress_text():

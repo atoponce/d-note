@@ -1,7 +1,6 @@
 """This module sets up the paths for the Flask web application."""
 import os
 import utils
-from Crypto import Random
 from flask import Flask, render_template, request, redirect, url_for
 from note import Note
 
