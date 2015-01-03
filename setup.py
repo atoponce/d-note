@@ -20,11 +20,10 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 data_files = [
-('dnote/static', filter(os.path.isfile, glob.glob('static/*'))),
-('dnote/static/css', filter(os.path.isfile, glob.glob('dnote/css/*.css'))),
-('dnote/static/img', filter(os.path.isfile, glob.glob('dnote/img/*'))),
-('dnote/static/js', filter(os.path.isfile, glob.glob('dnote/js/*.js'))),
-('dnote/templates', filter(os.path.isfile, glob.glob('dnote/templates/*'))),
+('share/dnote/static/css', filter(os.path.isfile, glob.glob('dnote/static/css/*.css'))),
+('share/dnote/static/img', filter(os.path.isfile, glob.glob('dnote/static/img/*'))),
+('share/dnote/static/js', filter(os.path.isfile, glob.glob('dnote/static/js/*.js'))),
+('share/dnote/templates', filter(os.path.isfile, glob.glob('dnote/templates/*'))),
 ]
 
 setup(name='dnote',
