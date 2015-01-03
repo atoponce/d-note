@@ -1,5 +1,6 @@
 data/*
 dconfig.py
+build
 uwsgi.ini
 *.pyc
 *.swp
