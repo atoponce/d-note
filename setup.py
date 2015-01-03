@@ -15,9 +15,6 @@ if not os.path.exists(DCONFIG):
         f.write('duress_salt = "%s"\n' % os.urandom(16).encode('hex'))
     os.chmod(DCONFIG, 0440)
 
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
-
 data_files = [
 ('share/dnote/static/css', filter(os.path.isfile, glob.glob('dnote/static/css/*.css'))),
 ('share/dnote/static/img', filter(os.path.isfile, glob.glob('dnote/static/img/*'))),
