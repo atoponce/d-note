@@ -18,11 +18,25 @@ if not os.path.exists(DCONFIG):
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
+data_files = [
+('dnote/static', filter(os.path.isfile, glob.glob('static/*'))),
+('dnote/static/css', filter(os.path.isfile, glob.glob('dnote/css/*.css'))),
+('dnote/static/img', filter(os.path.isfile, glob.glob('dnote/img/*'))),
+('dnote/static/js', filter(os.path.isfile, glob.glob('dnote/js/*.js'))),
+('dnote/templates', filter(os.path.isfile, glob.glob('dnote/templates/*'))),
+]
+
 setup(name='dnote',
       version='1.0.1',
       description='Self-destructing notes web app',
+      license='GPLv3',
       author='Aaron Toponce',
       author_email='aaron.toponce@gmail.com',
       url='http://github.com/atoponce/d-note/',
       packages=['dnote'],
+      install_requires=[
+        "pycrypto",
+        "Flask",
+      ],
+      data_files=data_files,
      )
