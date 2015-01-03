@@ -3,6 +3,7 @@
 from distutils.core import setup
 
 import os
+import glob
 
 DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
 DCONFIG = os.path.dirname(os.path.realpath(__file__)) + "/dnote/dconfig.py"
