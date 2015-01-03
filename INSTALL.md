@@ -16,7 +16,7 @@ Now make a directory under your web root to clone the Git repository:
     # git clone https://github.com/atoponce/d-note.git /var/www/dnote
     # mkdir /var/www/dnote/data/
     # chown root.www-data /var/www/dnote/data
-    # chmod g+w,o= root.www-data /var/www/dnote/data
+    # chmod g+w,o= /var/www/dnote/data
 
 Configuration
 -------------
