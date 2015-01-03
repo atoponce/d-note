@@ -5,7 +5,6 @@ from distutils.core import setup
 import os
 import glob
 
-DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
 DCONFIG = os.path.dirname(os.path.realpath(__file__)) + "/dnote/dconfig.py"
 
 if not os.path.exists(DCONFIG):
@@ -24,6 +23,7 @@ data_files = [
 ('share/dnote/static/img', filter(os.path.isfile, glob.glob('dnote/static/img/*'))),
 ('share/dnote/static/js', filter(os.path.isfile, glob.glob('dnote/static/js/*.js'))),
 ('share/dnote/templates', filter(os.path.isfile, glob.glob('dnote/templates/*'))),
+('share/dnote/data', filter(os.path.isfile, glob.glob('dnote/data/*'))),
 ]
 
 setup(name='dnote',
@@ -34,9 +34,5 @@ setup(name='dnote',
       author_email='aaron.toponce@gmail.com',
       url='http://github.com/atoponce/d-note/',
       packages=['dnote'],
-      install_requires=[
-        "pycrypto",
-        "Flask",
-      ],
       data_files=data_files,
      )
