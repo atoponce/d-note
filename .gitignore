@@ -6,3 +6,4 @@ uwsgi.ini
 *.swp
 .*.swp
 *~
+MANIFEST
