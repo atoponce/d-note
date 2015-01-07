@@ -1,0 +1,2 @@
+recursive-include dnote/templates *
+recursive-include dnote/static *
