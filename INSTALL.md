@@ -10,24 +10,26 @@ install `python-flask` and `python-crypto`:
 The correct `python-crypto` package should be coming from
 https://www.dlitz.net/software/pycrypto/
 
-Now make a directory under your web root to clone the Git repository:
-
-    # mkdir /var/www/
-    # git clone https://github.com/atoponce/d-note.git /var/www/dnote
-    # mkdir /var/www/dnote/data/
-    # chown root.www-data /var/www/dnote/data
-    # chmod g+w,o= /var/www/dnote/data
-
 Configuration
 -------------
 Run the following from a terminal to setup the configuration file and data
 storage directory before launching the application:
 
-    $ python setup.py
+    $ python setup.py install
 
-This will create a `dconfig.py` which should have salts with random hexadecimal
-strings as their values, and should create a `/data` directory to store the
-notes.
+After the application is installed, the dconfig.py needs to be generated.
+
+Edit the dnote.ini in this directory and update the 'config_path' value in
+the [default] section. It is recommended that this value be either either
+/etc/dnote or ~/.dnote.  Once edited, copy the dnote.ini file to the directory
+you created.
+
+Once copied, run the following:
+
+    $ generate_dnote_hashes
+
+This will create a `dconfig.py` in the proper directory. This file should
+have salts with random hexadecimal strings as their values.
 
 Apache Setup
 ------------
@@ -48,7 +50,7 @@ Add the following contents to that file:
     logging.basicConfig(stream=sys.stderr)
     sys.path.insert(0,"/var/www/dnote/")
     from dnote import DNOTE as application
- 
+
 Now configure Apache to server the application. Create
 `/etc/apache2/site-available/` with the following contents. It&#39;s important
 that you serve the application over SSL. See additional Apache documentation as
