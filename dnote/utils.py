@@ -1,7 +1,7 @@
 """Utility functions for d-note."""
 import random
 from Crypto.Hash import SHA
-from note import DATA_DIR
+from note import data_dir
 
 def duress_text():
     """Return 5 random sentences of the Zen of Python."""
@@ -27,7 +27,7 @@ def verify_hashcash(token):
     token -- a proposed Hashcash token to validate."""
 
     digest = SHA.new(token)
-    with open('%s/hashcash.db' % DATA_DIR, 'a+') as database:
+    with open('%s/hashcash.db' % data_dir, 'a+') as database:
         if digest.hexdigest()[:4] == '0000' and token not in database.read():
             database.write(token+'\n')
             return True

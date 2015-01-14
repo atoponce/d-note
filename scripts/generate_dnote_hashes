@@ -27,6 +27,12 @@ for section in config.sections():
     for k, v in config.items(section):
         cfgs[section][k] = v
 
+# make data_dir
+data_dir = os.path.expanduser(cfgs['dnote']['data_dir'])
+
+if not os.path.isdir(data_dir):
+    os.makedirs(data_dir, 0755)
+
 dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
 dconfig = dconfig_path + "/dconfig.py"
 
