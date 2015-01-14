@@ -1,5 +1,7 @@
 data/*
 dconfig.py
+dist/
+*.egg-info/
 build
 uwsgi.ini
 *.pyc
