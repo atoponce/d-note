@@ -48,7 +48,6 @@ Add the following contents to that file:
     import sys
     import logging
     logging.basicConfig(stream=sys.stderr)
-    sys.path.insert(0,"/var/www/dnote/")
     from dnote import DNOTE as application
 
 Now configure Apache to server the application. Create
@@ -91,16 +90,16 @@ Nginx Setup
 Install uwsgi:
 
     # apt-get install uwsgi uwsgi-core uwsgi-extra uwsgi-plugin-python
-    
+
 Create a uwsgi.ini file in the directory with the application:
 
     # touch /var/www/dnote/uwsgi.ini
-    
+
 And add the following to that file (you can tweak these settings as required):
 
     [uwsgi]
-    socket = /tmp/dnote.sock
-    chdir = /var/www/dnote
+    socket = 127.0.0.1:8081
+    chdir = /python/path/site-packages/dnote-1.0.1-py2.7.egg/dnote
     plugin = python
     module = __init__:dnote
     processes = 4
@@ -109,11 +108,11 @@ And add the following to that file (you can tweak these settings as required):
     uid = www-data
     gid = www-data
     logto = /var/log/dnote.log
-    
-You can now start the dnote application by running: 
+
+You can now start the dnote application by running:
 
     # /usr/bin/uwsgi -c /var/www/dnote/uwsgi.ini
-    
+
 This will start uwsgi in the foreground.  To start it as a
 daemon:
 
@@ -121,7 +120,7 @@ daemon:
 
 You may want to add this to an init or upstart script, see:
 http://uwsgi-docs.readthedocs.org/en/latest/Management.html
-    
+
 Now lets configure nginx. A common example would be if you wanted it 
 to be avaliable under http://yoursite.tld/dnote. To acheive this, add
 the following to your sites config (again, you can tweak thsi as needed):
@@ -132,7 +131,7 @@ the following to your sites config (again, you can tweak thsi as needed):
         include uwsgi_params;
         uwsgi_param SCRIPT_NAME /dnote;
         uwsgi_modifier1 30;
-        uwsgi_pass unix:/tmp/dnote.sock;
+        uwsgi_pass 127.0.0.1:8081;
     }
 
 And tada, restart the Nginx server and you should have a working dnote setup.
@@ -149,8 +148,8 @@ dnote.wsgi file (as in the Apache directions above) and using uwsgi-file
 in the uwsgi.ini file instead of module, like this:
 
     [uwsgi]
-    socket = /tmp/dnote.sock
-    chdir = /var/www/dnote
+    socket = 127.0.0.1:8081
+    chdir = /python/path/site-packages/dnote-1.0.1-py2.7.egg/dnote
     plugin = python
     wsgi-file = /var/www/dnote.wsgi
     processes = 4
