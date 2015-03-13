@@ -10,24 +10,26 @@ install `python-flask` and `python-crypto`:
 The correct `python-crypto` package should be coming from
 https://www.dlitz.net/software/pycrypto/
 
-Now make a directory under your web root to clone the Git repository:
-
-    # mkdir /var/www/
-    # git clone https://github.com/atoponce/d-note.git /var/www/dnote
-    # mkdir /var/www/dnote/data/
-    # chown root.www-data /var/www/dnote/data
-    # chmod g+w,o= /var/www/dnote/data
-
 Configuration
 -------------
 Run the following from a terminal to setup the configuration file and data
 storage directory before launching the application:
 
-    $ python setup.py
+    $ python setup.py install
 
-This will create a `dconfig.py` which should have salts with random hexadecimal
-strings as their values, and should create a `/data` directory to store the
-notes.
+After the application is installed, the dconfig.py needs to be generated.
+
+Edit the dnote.ini in this directory and update the 'config_path' value in
+the [default] section. It is recommended that this value be either either
+/etc/dnote or ~/.dnote.  Once edited, copy the dnote.ini file to the directory
+you created.
+
+Once copied, run the following:
+
+    $ generate_dnote_hashes
+
+This will create a `dconfig.py` in the proper directory. This file should
+have salts with random hexadecimal strings as their values.
 
 Apache Setup
 ------------
@@ -46,9 +48,8 @@ Add the following contents to that file:
     import sys
     import logging
     logging.basicConfig(stream=sys.stderr)
-    sys.path.insert(0,"/var/www/dnote/")
     from dnote import DNOTE as application
- 
+
 Now configure Apache to server the application. Create
 `/etc/apache2/site-available/` with the following contents. It&#39;s important
 that you serve the application over SSL. See additional Apache documentation as
@@ -89,16 +90,16 @@ Nginx Setup
 Install uwsgi:
 
     # apt-get install uwsgi uwsgi-core uwsgi-extra uwsgi-plugin-python
-    
+
 Create a uwsgi.ini file in the directory with the application:
 
     # touch /var/www/dnote/uwsgi.ini
-    
+
 And add the following to that file (you can tweak these settings as required):
 
     [uwsgi]
-    socket = /tmp/dnote.sock
-    chdir = /var/www/dnote
+    socket = 127.0.0.1:8081
+    chdir = /python/path/site-packages/dnote-1.0.1-py2.7.egg/dnote
     plugin = python
     module = __init__:dnote
     processes = 4
@@ -107,11 +108,11 @@ And add the following to that file (you can tweak these settings as required):
     uid = www-data
     gid = www-data
     logto = /var/log/dnote.log
-    
-You can now start the dnote application by running: 
+
+You can now start the dnote application by running:
 
     # /usr/bin/uwsgi -c /var/www/dnote/uwsgi.ini
-    
+
 This will start uwsgi in the foreground.  To start it as a
 daemon:
 
@@ -119,7 +120,7 @@ daemon:
 
 You may want to add this to an init or upstart script, see:
 http://uwsgi-docs.readthedocs.org/en/latest/Management.html
-    
+
 Now lets configure nginx. A common example would be if you wanted it 
 to be avaliable under http://yoursite.tld/dnote. To acheive this, add
 the following to your sites config (again, you can tweak thsi as needed):
@@ -130,7 +131,7 @@ the following to your sites config (again, you can tweak thsi as needed):
         include uwsgi_params;
         uwsgi_param SCRIPT_NAME /dnote;
         uwsgi_modifier1 30;
-        uwsgi_pass unix:/tmp/dnote.sock;
+        uwsgi_pass 127.0.0.1:8081;
     }
 
 And tada, restart the Nginx server and you should have a working dnote setup.
@@ -147,8 +148,8 @@ dnote.wsgi file (as in the Apache directions above) and using uwsgi-file
 in the uwsgi.ini file instead of module, like this:
 
     [uwsgi]
-    socket = /tmp/dnote.sock
-    chdir = /var/www/dnote
+    socket = 127.0.0.1:8081
+    chdir = /python/path/site-packages/dnote-1.0.1-py2.7.egg/dnote
     plugin = python
     wsgi-file = /var/www/dnote.wsgi
     processes = 4

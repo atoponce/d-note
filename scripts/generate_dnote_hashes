@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import os
+import ConfigParser
+
+# copy the config file from conf dir to either /etc/dnote or ~/.dnote,
+# then run this script.
+
+config = ConfigParser.SafeConfigParser()
+
+for path in ['/etc/dnote', '~/.dnote']:
+    expanded_path = "{0}/{1}".format(os.path.expanduser(path), 'd-note.ini')
+    if os.path.exists(expanded_path):
+      try:
+          f = open(expanded_path)
+          config.readfp(f)
+          f.close()
+      except ConfigParser.InterpolationSyntaxError as e:
+          raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+
+cfgs = {}
+
+for section in config.sections():
+    if not cfgs.has_key(section):
+        cfgs[section] = {}
+
+    for k, v in config.items(section):
+        cfgs[section][k] = v
+
+# make data_dir
+data_dir = os.path.expanduser(cfgs['dnote']['data_dir'])
+
+if not os.path.isdir(data_dir):
+    os.makedirs(data_dir, 0755)
+
+dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
+dconfig = dconfig_path + "/dconfig.py"
+
+if not os.path.isdir(dconfig_path):
+    os.makedirs(dconfig_path, 0755)
+
+if not os.path.exists(dconfig):
+    with open(dconfig, 'w') as f:
+        f.write('aes_salt = "%s"\n' % os.urandom(16).encode('hex'))
+        f.write('mac_salt = "%s"\n' % os.urandom(16).encode('hex'))
+        f.write('nonce_salt = "%s"\n' % os.urandom(16).encode('hex'))
+        f.write('duress_salt = "%s"\n' % os.urandom(16).encode('hex'))
+    os.chmod(dconfig, 0440)

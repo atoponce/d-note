@@ -1,19 +1,52 @@
 """Encrypts and decrypts notes."""
 import base64
 import os
+import sys
 import zlib
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Util import Counter
 
+import ConfigParser
+
+# copy the config file from conf dir to either /etc/dnote or ~/.dnote,
+# then run this script.
+
+config = ConfigParser.SafeConfigParser()
+
+for path in ['/etc/dnote', '~/.dnote']:
+    expanded_path = "{0}/{1}".format(os.path.expanduser(path), 'd-note.ini')
+    if os.path.exists(expanded_path):
+      try:
+          f = open(expanded_path)
+          config.readfp(f)
+          f.close()
+      except ConfigParser.InterpolationSyntaxError as e:
+          raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+
+cfgs = {}
+
+for section in config.sections():
+    if not cfgs.has_key(section):
+        cfgs[section] = {}
+
+    for k, v in config.items(section):
+        cfgs[section][k] = v
+
+dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
+dconfig = dconfig_path + "/dconfig.py"
+
+# add dconfig.py to the sys.path
+sys.path.append(dconfig_path)
+
 try:
     import dconfig
 except ImportError:
-    print "You need to run 'python setup.py' as part of the installation."
+    print "You need to run 'generate_dnote_hashes' as part of the installation."
     os.sys.exit(1)
 
-DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + "/data"
+data_dir = os.path.expanduser(cfgs['dnote']['data_dir'])
 
 class Note(object):
     """Note Model"""
@@ -41,9 +74,9 @@ class Note(object):
     def path(self, kind=None):
         """Return the file path to the note file"""
         if kind is None:
-            return '%s/%s' % (DATA_DIR, self.fname)
+            return '%s/%s' % (data_dir, self.fname)
         else:
-            return '%s/%s.%s' % (DATA_DIR, self.fname, kind)
+            return '%s/%s.%s' % (data_dir, self.fname, kind)
 
     def create_url(self):
         """Create a cryptographic nonce for our URL, and use PBKDF2 with our
