@@ -206,6 +206,15 @@ the following to your sites config (again, you can tweak thsi as needed):
 And tada, restart the Nginx server and you should have a working dnote setup.
 
 
+cronjob for removing old notes
+------------------------------
+
+Add the following to /etc/crontab to automatically delete old Notes (30 days)
+without deleting the hashcash.db file:
+
+5 0     * * *   root    find /var/lib/dnote/data/* \( -iname "*" ! -iname "hashcash.db" \) -mtime +30 -exec rm {} \;
+
+
 Troubleshooting
 ---------------
 If you are getting any internal service errors make sure to verify that the
