@@ -215,6 +215,15 @@ without deleting the hashcash.db file:
 5 0     * * *   root    find /var/lib/dnote/data/* \( -iname "*" ! -iname "hashcash.db" \) -mtime +30 -exec rm {} \;
 
 
+IPTables flood/(D)DoS/bruteforce protection
+-------------------------------------------
+
+iptables -A INPUT -s 0.0.0.0/0 -d 0.0.0.0/0 -p tcp --syn --dport 80 -m connlimit --connlimit-above 20 -j LOGGING
+iptables -A INPUT -s 0.0.0.0/0 -d 0.0.0.0/0 -p tcp --syn --dport 443 -m connlimit --connlimit-above 20 -j LOGGING
+iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "iptables-http-connlimit: " --log-level 4
+iptables -A LOGGING -p tcp -j REJECT --reject-with tcp-reset
+
+
 Troubleshooting
 ---------------
 If you are getting any internal service errors make sure to verify that the
