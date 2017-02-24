@@ -108,8 +108,14 @@ class Note(object):
 
         self.url = url
         url = url + "==" # add the padding back
-        self.nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
-        self.f_key = KDF.PBKDF2(
+
+	try:
+	        self.nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
+	except:
+		url = "errormessage=="
+		self.nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
+
+	self.f_key = KDF.PBKDF2(
             self.nonce, dconfig.nonce_salt.decode("hex"), 16)
         self.aes_key = KDF.PBKDF2(
             self.nonce, dconfig.aes_salt.decode("hex"), 32)
