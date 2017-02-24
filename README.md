@@ -1,6 +1,16 @@
 d-note
 ======
 
+Fork information
+================
+This is a fork of atoponce/d-note because it was not being maintained.
+I have made several changes to securely run this as a company service.
+
+The changes / commits will be added shortly
+
+ With kind regards,
+     Thijssss
+
 Background
 ----------
 
