@@ -55,31 +55,100 @@ Now configure Apache to server the application. Create
 that you serve the application over SSL. See additional Apache documentation as
 necessary.
 
-    <Virtualhost *:443>
-        DocumentRoot /var/www/
-        CustomLog /var/log/apache2/access.log combined
-        ServerName www.example.com
-        ServerAlias www.example.com example.com
-        ServerAdmin webmaster@example.com
-        <Directory /var/www/>
-            Options -Indexes FollowSymLinks
-        </Directory>
-        WSGIScriptAlias / /var/www/dnote.wsgi
-        <Directory /var/www/dnote/
-            Order allow,deny
-            Allow from all
-        </Directory>
-            Alias /d/static /var/www/dnote/static
-        <Directory /var/www/dnote/static/>
-            Order allow,deny
-            Allow from all
-        </Directory>
+Notes:
+ - Change <www.yourwebsite.tld> to your own URL.
+ - Logs changed to only contain method, not the actualy request to avoid logging Note URLs in local logs
+ - Secure headers
+ - Replace <www.yourotherwebsite.tld> with your own second public URL
+ - Set your own public public cert, private key and intermediate CA file paths
+ - Fix 404 is to make sure a template error message will get used in those conditions
+ - "## Deny access" can be used to limit those who can store a Note
 
-        SSLEngine on
-        SSLCertificateFile /etc/ssl/certs/www_example_com.crt
-        SSLCertificateKeyFile /etc/ssl/private/www_example_com.key
-        SSLHonorCipherOrder On
-    </VirtualHost>
+<Virtualhost *:80>
+    Redirect permanent / https://<www.yourwebsite.tld>/
+</VirtualHost>
+
+<Virtualhost *:443>
+    DocumentRoot /var/www/
+    ServerName <www.yourwebsite.tld>
+    ServerAdmin webmaster@<www.yourwebsite.tld>
+
+    LogFormat "%h %l %u %t \"%m\" %>s %O \"%{User-Agent}i\"" securelog
+    CustomLog /var/log/apache2/access.log securelog
+
+    Header always edit Set-Cookie ^(.*)$ $1;secure
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=315360000; includeSubDomains; preload"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+
+    <Directory /var/www/>
+        Options -Indexes +FollowSymLinks
+    </Directory>
+
+    WSGIScriptAlias / /var/www/dnote.wsgi
+
+    <Directory /var/www/dnote/>
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+        Alias /d/static /var/www/dnote/static
+
+    <Directory /var/www/dnote/static/>
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    # In case you want to limit access
+    <Location />
+        #order deny,allow
+        #deny from all
+        #allow from 127.0.0.1
+    </Location>
+
+    ## In case you want to limit specific access
+    #<Location ~ "/.+">
+    #    order deny,allow
+    #    allow from all
+    #</Location>
+
+    # Enable rewriteEngine
+    RewriteEngine On
+
+    # Redirect IP based requests to hostname
+    RewriteCond %{HTTP_HOST} !^<www.yourwebsite.tld>$
+    RewriteRule /.* https://<www.yourwebsite.tld>/ [R]
+
+    ## Deny access to parts where data is entered
+    ## Redirect Internet users from / to public website
+    #RewriteCond "%{REMOTE_ADDR}" "!=127.0.0.1"
+    #RewriteCond "%{REQUEST_URI}" "^/$"          [OR]
+    #RewriteCond "%{REQUEST_URI}" "^/post$"      [OR]
+    #RewriteCond "%{REQUEST_URI}" "^/about/$"    [OR]
+    #RewriteCond "%{REQUEST_URI}" "^/security/$" [OR]
+    #RewriteCond "%{REQUEST_URI}" "^/faq/$"
+    #RewriteRule "^/(.*)$" "https://<www.yourotherwebsite.tld>/" [R,L]
+
+    # Fix 404
+    RewriteCond "%{REQUEST_URI}" "!^/post$"
+    RewriteCond "%{REQUEST_URI}" "!^/about/$"
+    RewriteCond "%{REQUEST_URI}" "!^/security/$"
+    RewriteCond "%{REQUEST_URI}" "!^/faq/$"
+    RewriteCond "%{REQUEST_URI}" "^/.*/$"
+    RewriteRule "^/(.*)$" "https://<www.yourwebsite.tld>/error" [R,L]
+
+    # Enable and configure SSL
+    SSLEngine               on
+    SSLProtocol             all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite          EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+    SSLHonorCipherOrder     on
+    SSLCertificateFile      /etc/apache2/ssl/your_public_cert.crt
+    SSLCertificateKeyFile   /etc/apache2/ssl/your_private_key.key
+    SSLCertificateChainFile /etc/apache2/ssl/ca_intermediate_certificates.pem
+</VirtualHost>
+
 
 Restart Apache, and verify that the site loads:
 
@@ -135,6 +204,24 @@ the following to your sites config (again, you can tweak thsi as needed):
     }
 
 And tada, restart the Nginx server and you should have a working dnote setup.
+
+
+cronjob for removing old notes
+------------------------------
+
+Add the following to /etc/crontab to automatically delete old Notes (30 days)
+without deleting the hashcash.db file:
+
+5 0     * * *   root    find /var/lib/dnote/data/* \( -iname "*" ! -iname "hashcash.db" \) -mtime +30 -exec rm {} \;
+
+
+IPTables flood/(D)DoS/bruteforce protection
+-------------------------------------------
+
+iptables -A INPUT -s 0.0.0.0/0 -d 0.0.0.0/0 -p tcp --syn --dport 80 -m connlimit --connlimit-above 20 -j LOGGING
+iptables -A INPUT -s 0.0.0.0/0 -d 0.0.0.0/0 -p tcp --syn --dport 443 -m connlimit --connlimit-above 20 -j LOGGING
+iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "iptables-http-connlimit: " --log-level 4
+iptables -A LOGGING -p tcp -j REJECT --reject-with tcp-reset
 
 
 Troubleshooting

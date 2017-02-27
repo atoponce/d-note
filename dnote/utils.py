@@ -26,6 +26,11 @@ def verify_hashcash(token):
     Keyword arguments:
     token -- a proposed Hashcash token to validate."""
 
+    try:
+        token.decode('ascii')
+    except:
+        return False
+
     digest = SHA.new(token)
     with open('%s/hashcash.db' % data_dir, 'a+') as database:
         if digest.hexdigest()[:4] == '0000' and token not in database.read():

@@ -1,6 +1,30 @@
 d-note
 ======
 
+Fork information
+================
+This is a fork of atoponce/d-note because it was not being maintained.
+I have made several changes to securely run this as a company service:
+
+ - IPTables bruteforce protection
+ - Generate URL (Note ID) on server, not by the client
+ - Improved Apache configuration
+   - Adjusted Logging using LogFormat to not log the actual request; otherwise it would leak URL (Note ID) information in logs.
+     These could actually be used if for example a Note was requested with a wrong password.
+   - End security related headers
+   - Rewrite IP based requests to actual hostname to match TLS certificate
+   - Make it possible to separate access between being able to POST a Note and to READ a note
+   - Rewrite certain requests so the program uses the 404 error template instead of Apache giving an error
+   - Improve SSL configuration
+ - Added ASCII input validation on hashcash input
+ - Added crontab information to delete old notes (30 days)
+ - Added input validation on URL to avoid Apache 500 errors caused by padding problem with invalid, too long or short URLs
+
+See the Wiki for more information.
+
+ With kind regards,
+     Thijssss
+
 Background
 ----------
 

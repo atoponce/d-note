@@ -1,6 +1,8 @@
 """This module sets up the paths for the Flask web application."""
 import os
 import utils
+import random
+import string
 from flask import Flask, render_template, request, redirect, url_for
 from note import Note
 
@@ -32,8 +34,23 @@ def about():
 @DNOTE.route('/post', methods=['POST'])
 def show_post():
     """Return the random URL after posting the plaintext."""
-    new_url = request.form["new_url"]
+    # Generate URL server-side    
+    min_char = 16
+    max_char = 25
+    allchar = string.ascii_letters + string.digits
+    new_url = "".join(random.SystemRandom().choice(allchar) for x in range(random.randint(min_char, max_char)))
+
+    # Create Note object
     note = Note(new_url)
+
+    # Check to avoid overwriting existing Note, regenerate if necessary - sorry hardcoded data_dir path for now
+    data_dir = "/var/lib/dnote/data/"
+    pathFilename = data_dir + note.fname
+    while os.path.isfile(pathFilename):
+       new_url = "".join(random.SystemRandom().choice(allchar) for x in range(random.randint(min_char, max_char)))
+       note = Note(new_url)
+       pathFilename = data_dir + note.fname
+
     note.plaintext = request.form['paste']
 
     passphrase = request.form.get('pass', False)
