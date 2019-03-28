@@ -1,0 +1,17 @@
+#!/bin/bash
+
+while true
+do
+    export PYTHONPATH=/root/app/;
+    exec gunicorn dnote:DNOTE \
+      --bind=0.0.0.0:8080 \
+      --name=dnote \
+      --pythonpath=$PYTHONPATH \
+      --proxy-allow-from='*' \
+      --access-logfile='-' \
+      --error-logfile='-' \
+      --threads=2 \
+      --workers=2 \
+      --worker-class=sync;
+    echo "Crashed with code: $?";
+done
