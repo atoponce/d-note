@@ -45,4 +45,6 @@ if not os.path.exists(dconfig):
         f.write('mac_salt = "%s"\n' % os.urandom(16).encode('hex'))
         f.write('nonce_salt = "%s"\n' % os.urandom(16).encode('hex'))
         f.write('duress_salt = "%s"\n' % os.urandom(16).encode('hex'))
+        f.write('server_secret = "%s"\n' % os.urandom(64).encode('hex'))
+        f.write('signature_validity = 300  # seconds\n')
     os.chmod(dconfig, 0440)

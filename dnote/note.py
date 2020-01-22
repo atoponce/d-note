@@ -2,9 +2,10 @@
 import base64
 import os
 import sys
+import time
 import zlib
 from Crypto.Cipher import AES
-from Crypto.Hash import HMAC, SHA512
+from Crypto.Hash import HMAC, SHA512, SHA384
 from Crypto.Protocol import KDF
 from Crypto.Util import Counter
 
@@ -60,12 +61,47 @@ class Note(object):
     dkey = None         # Duress passphrase
     plaintext = None    # Plain text note
     ciphertext = None   # Encrypted text
+    timestamp = None    # current time
+    signature = None    # signature
 
     def __init__(self, url=None):
         if url is None:
             self.create_url()
+            self.sign_note()
         else:
             self.decode_url(url)
+
+    @staticmethod
+    def validate_signature(url, timestamp, provided_signature):
+        # Raise an exception for invalid signature
+
+        if url is None or timestamp is None:
+            raise ValueError("timestamp and/or url are None")
+
+        delta = int(time.time()) - int(float(timestamp))
+        if delta < 0 or delta > dconfig.signature_validity:
+            raise ValueError("Signature has expired")
+
+        computed_signature = Note.get_signature(url=url, timestamp=timestamp)
+
+        # FIXME: requires python3.3
+        #if not HMAC.compare_digest(computed_signature, provided_signature):
+        if computed_signature != provided_signature:
+            raise ValueError("Invalid signature provided!")
+
+    def sign_note(self):
+        if self.url is None:
+            raise ValueError("url has not been set")
+
+        self.timestamp = str(time.time())
+
+        self.signature = Note.get_signature(url=self.url, timestamp=self.timestamp)
+
+    @staticmethod
+    def get_signature(url, timestamp):
+        data = "{timestamp}?{url}".format(timestamp=timestamp, url=url)
+        sig = HMAC.new(dconfig.server_secret, data, SHA384)
+        return sig.hexdigest()
 
     def exists(self):
         """Checks if note already exists"""
