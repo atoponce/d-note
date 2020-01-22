@@ -12,7 +12,7 @@ def index():
     """Return the index.html for the main application."""
     error = request.args.get('error', None)
     note = Note()
-    return render_template('index.html', random=note.url, error=error)
+    return render_template('index.html', note=note, error=error)
 
 @DNOTE.route('/security/', methods=['GET'])
 def security():
@@ -33,6 +33,9 @@ def about():
 def show_post():
     """Return the random URL after posting the plaintext."""
     new_url = request.form["new_url"]
+    timestamp = request.form["timestamp"]
+    signature = request.form["signature"]
+
     note = Note(new_url)
     note.plaintext = request.form['paste']
 
@@ -41,6 +44,12 @@ def show_post():
 
     if not utils.verify_hashcash(token):
         return redirect(url_for('index', error='hashcash'))
+
+    try:
+        note.validate_signature(url=new_url, timestamp=timestamp,
+                                provided_signature=signature)
+    except Exception as e:
+        return render_template('signerror.html', error=e)
 
     if passphrase:
         note.set_passphrase(passphrase)
