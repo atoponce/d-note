@@ -1,5 +1,6 @@
 """Encrypts and decrypts notes."""
 import base64
+import configparser
 import os
 import sys
 import zlib
@@ -8,45 +9,51 @@ from Crypto.Hash import HMAC, SHA512
 from Crypto.Protocol import KDF
 from Crypto.Util import Counter
 
-import ConfigParser
-
 # copy the config file from conf dir to either /etc/dnote or ~/.dnote,
 # then run this script.
 
-config = ConfigParser.SafeConfigParser()
+try:
 
-for path in ['/etc/dnote', '~/.dnote']:
-    expanded_path = "{0}/{1}".format(os.path.expanduser(path), 'd-note.ini')
-    if os.path.exists(expanded_path):
-      try:
-          f = open(expanded_path)
-          config.readfp(f)
-          f.close()
-      except ConfigParser.InterpolationSyntaxError as e:
-          raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+    config = configparser.ConfigParser()
 
-cfgs = {}
+    for path in ['/etc/dnote', '~/.dnote']:
+        expanded_path = "{0}/{1}".format(os.path.expanduser(path), 'd-note.ini')
+        if os.path.exists(expanded_path):
+            try:
+                config.read(expanded_path)
+                print(f"Using config file: {expanded_path}")
+                break
+            except configparser.InterpolationSyntaxError as e:
+                raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+    else:
+        raise ValueError("Config file not found")
 
-for section in config.sections():
-    if not cfgs.has_key(section):
-        cfgs[section] = {}
+    cfgs = config.defaults()
 
-    for k, v in config.items(section):
-        cfgs[section][k] = v
+    for section in config.sections():
+        if section not in cfgs:
+            cfgs[section] = {}
 
-dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
-dconfig = dconfig_path + "/dconfig.py"
+        for k, v in config.items(section):
+            cfgs[section][k] = v
 
-# add dconfig.py to the sys.path
-sys.path.append(dconfig_path)
+    dconfig_path = os.path.expanduser(cfgs.get('dnote', {}).get('config_path'))
+    dconfig = dconfig_path + "/dconfig.py"
+
+    # add dconfig.py to the sys.path
+    sys.path.append(dconfig_path)
+
+except Exception as e:
+    raise Exception(f"unable to load config: {e}")
 
 try:
     import dconfig
 except ImportError:
-    print "You need to run 'generate_dnote_hashes' as part of the installation."
+    print("You need to run 'generate_dnote_hashes' as part of the installation.")
     os.sys.exit(1)
 
-data_dir = os.path.expanduser(cfgs['dnote']['data_dir'])
+data_dir = os.path.expanduser(cfgs.get('dnote', {}).get('data_dir'))
+
 
 class Note(object):
     """Note Model"""
@@ -74,9 +81,9 @@ class Note(object):
     def path(self, kind=None):
         """Return the file path to the note file"""
         if kind is None:
-            return '%s/%s' % (data_dir, self.fname)
+            return f'{data_dir}/{self.fname}'
         else:
-            return '%s/%s.%s' % (data_dir, self.fname, kind)
+            return f'{data_dir}/{self.fname}.{kind}'
 
     def create_url(self):
         """Create a cryptographic nonce for our URL, and use PBKDF2 with our
@@ -107,7 +114,7 @@ class Note(object):
         url -- the url after the FQDN provided by the client"""
 
         self.url = url
-        url = url + "==" # add the padding back
+        url = url + "=="  # add the padding back
         self.nonce = base64.urlsafe_b64decode(url.encode("utf-8"))
         self.f_key = KDF.PBKDF2(
             self.nonce, dconfig.nonce_salt.decode("hex"), 16)

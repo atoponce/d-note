@@ -1,27 +1,29 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
-import ConfigParser
+import configparser
+import codecs
 
 # copy the config file from conf dir to either /etc/dnote or ~/.dnote,
 # then run this script.
 
-config = ConfigParser.SafeConfigParser()
+config = configparser.ConfigParser()
 
 for path in ['/etc/dnote', '~/.dnote']:
-    expanded_path = "{0}/{1}".format(os.path.expanduser(path), 'd-note.ini')
+    expanded_path = os.path.join(os.path.expanduser(path), 'd-note.ini')
     if os.path.exists(expanded_path):
-      try:
-          f = open(expanded_path)
-          config.readfp(f)
-          f.close()
-      except ConfigParser.InterpolationSyntaxError as e:
-          raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+        print(f"Using config file: {expanded_path}")
+        try:
+            f = open(expanded_path)
+            config.read(f)
+            f.close()
+        except configparser.InterpolationSyntaxError as e:
+            raise EOFError("Unable to parse configuration file properly: {0}".format(e))
 
 cfgs = {}
 
 for section in config.sections():
-    if not cfgs.has_key(section):
+    if section not in cfgs:
         cfgs[section] = {}
 
     for k, v in config.items(section):
@@ -31,18 +33,23 @@ for section in config.sections():
 data_dir = os.path.expanduser(cfgs['dnote']['data_dir'])
 
 if not os.path.isdir(data_dir):
-    os.makedirs(data_dir, 0755)
+    os.makedirs(data_dir, mode=0o755)
 
 dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
 dconfig = dconfig_path + "/dconfig.py"
 
 if not os.path.isdir(dconfig_path):
-    os.makedirs(dconfig_path, 0755)
+    os.makedirs(dconfig_path, mode=0o755)
+
+
+def get_hash(length: int = 16) -> bytes:
+    return codecs.encode(os.urandom(length), 'hex')
+
 
 if not os.path.exists(dconfig):
     with open(dconfig, 'w') as f:
-        f.write('aes_salt = "%s"\n' % os.urandom(16).encode('hex'))
-        f.write('mac_salt = "%s"\n' % os.urandom(16).encode('hex'))
-        f.write('nonce_salt = "%s"\n' % os.urandom(16).encode('hex'))
-        f.write('duress_salt = "%s"\n' % os.urandom(16).encode('hex'))
-    os.chmod(dconfig, 0440)
+        f.write(f'aes_salt = "{get_hash()}"\n')
+        f.write(f'mac_salt = "{get_hash()}"\n')
+        f.write(f'nonce_salt = "{get_hash()}"\n')
+        f.write(f'duress_salt = "{get_hash()}"\n')
+    os.chmod(dconfig, mode=0o440)
