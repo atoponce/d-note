@@ -1,18 +1,35 @@
 """Utility functions for d-note."""
+import codecs
+import os
 import random
 from Crypto.Hash import SHA
 from .note import data_dir
+
+
+def dec(obj, encoding: str = 'hex'):
+    return codecs.decode(obj, encoding)
+
+
+def enc(obj, encoding: str = 'hex'):
+    return codecs.encode(obj, encoding)
+
+
+def get_rand_bytes(length: int = 16) -> bytes:
+    return os.urandom(length)
+
+
+def logit(name, var):
+    print(f"var: {name}, value: {var}, type: {type(var)}")
 
 
 def duress_text():
     """Return 5 random sentences of the Zen of Python."""
     import subprocess
     text = ''
-    python = subprocess.Popen(('python', '-c', 'import this'),
-                              stdout=subprocess.PIPE)
-    sentence = [x for x in python.communicate()[0].splitlines() if x != '']
-    for _ in range(5):
-        text = text + random.choice(sentence) + ' '
+    python = subprocess.Popen(('python3', '-c', 'import this'), stdout=subprocess.PIPE)
+    lines = dec(python.communicate()[0], "utf-8").splitlines()
+    sentence = [x for x in lines if x != '']
+    text = ' '.join(random.choices(sentence, k=5))
     return text
 
 
@@ -28,10 +45,10 @@ def verify_hashcash(token):
     Keyword arguments:
     token -- a proposed Hashcash token to validate."""
 
-    digest = SHA.new(token)
-    with open(f'{data_dir}/hashcash.db', 'a+') as database:
+    digest = SHA.new(enc(token, "utf-8"))
+    with open(os.path.join(data_dir, 'hashcash.db'), 'a+') as database:
         if digest.hexdigest()[:4] == '0000' and token not in database.read():
-            database.write(token + '\n')
+            database.write(f'{token}\n')
             return True
         else:
             return False

@@ -14,13 +14,13 @@ for path in ['/etc/dnote', '~/.dnote']:
     if os.path.exists(expanded_path):
         print(f"Using config file: {expanded_path}")
         try:
-            f = open(expanded_path)
-            config.read(f)
-            f.close()
+            config.read(expanded_path)
+            print(f"Using config file: {expanded_path}")
+            break
         except configparser.InterpolationSyntaxError as e:
-            raise EOFError("Unable to parse configuration file properly: {0}".format(e))
+            raise EOFError(f"Unable to parse configuration file properly: {e}")
 
-cfgs = {}
+cfgs = config.defaults()
 
 for section in config.sections():
     if section not in cfgs:
@@ -36,20 +36,28 @@ if not os.path.isdir(data_dir):
     os.makedirs(data_dir, mode=0o755)
 
 dconfig_path = os.path.expanduser(cfgs['dnote']['config_path'])
-dconfig = dconfig_path + "/dconfig.py"
+dconfig = os.path.join(dconfig_path, "dconfig.py")
 
 if not os.path.isdir(dconfig_path):
     os.makedirs(dconfig_path, mode=0o755)
 
 
-def get_hash(length: int = 16) -> bytes:
-    return codecs.encode(os.urandom(length), 'hex')
+def enc(obj, encoding: str = 'hex'):
+    return codecs.encode(obj, encoding)
+
+
+def get_rand_bytes(length: int = 16) -> bytes:
+    return os.urandom(length)
+
+
+def get_new_hash(length: int = 16):
+    return enc(get_rand_bytes(length))
 
 
 if not os.path.exists(dconfig):
     with open(dconfig, 'w') as f:
-        f.write(f'aes_salt = "{get_hash()}"\n')
-        f.write(f'mac_salt = "{get_hash()}"\n')
-        f.write(f'nonce_salt = "{get_hash()}"\n')
-        f.write(f'duress_salt = "{get_hash()}"\n')
+        f.write(f'aes_salt = "{get_new_hash()}"\n')
+        f.write(f'mac_salt = "{get_new_hash()}"\n')
+        f.write(f'nonce_salt = "{get_new_hash()}"\n')
+        f.write(f'duress_salt = "{get_new_hash()}"\n')
     os.chmod(dconfig, mode=0o440)
