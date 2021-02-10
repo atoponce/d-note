@@ -1,63 +1,71 @@
 {% extends "base.html" %}
 {% block title %}Note Created{% endblock %}
 {% block head %}
-    <script type="application/javascript" src="{{ url_for('index')
+<script type="application/javascript" src="{{ url_for('index')
     }}static/js/qrcode-min.js"></script>
-    <script type="application/javascript">
-        window.onload = function() {
-            var secret = document.getElementById('note');
-            secret.focus ();
-            secret.select ();
-        }
-    </script>
+<script type="application/javascript">
+    window.onload = function () {
+        var secret = document.getElementById('note');
+        secret.focus();
+        secret.select();
+    }
+</script>
 {% endblock %}
 {% block destroy %}
-            <span class="nav"><a class="destroy" href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Destroy note</a></span>
+<span class="nav"><a class="destroy" href="{{ url_for('fetch_url', random_url=random, _external=True) }}">Destroy
+        note</a></span>
 {% endblock%}
 {% block content %}
-    <h1>Your Secret Note Details</h1>
-    <p>If you submitted this note in error, you can <a href="{{ url_for('fetch_url', random_url=random, _external=True) }}">destroy the note here</a></li>.</p>
-    <p><b>Your private url:</b>
-        <span class="mono">{{ url_for('fetch_url', random_url=random, _external=True) }}</span>
-    </p>
-    <p><b>Your private ID:</b>
-        <span class="mono">{{ random }}</span>
-        <span class="tooltip">
-            <span class="trigger">?</span>
-            <span class="popup">For plausible deniability, provide just the private ID to the note, rather than the full URL.</span>
-        </span>
-    </p>
-    {% if passphrase %}
-    <p><b>Your passphrase:</b>
-        <span class="mono">{{ passphrase}}</span>
-    </p>
-    {% endif %}
-    {% if duress %}
-    <p><b>Your duress key:</b>
-        <span class="mono">{{ duress }}</span>
-        <span class="tooltip">
-            <span class="trigger">?</span>
-            <span class="popup">A key that you provide to someone that is demanding decryption of the note. Except, this key will immediately destroy the note, without decrypting it.</span>
-        </span>
-    </p>
-    {% endif %}
-    <p>Alternatively, you can scan this QR code, and "share" it using your mobile device via text message, email, etc. <strong>NOTE:</strong> <a href='https://f-droid.org/repository/browse/?fdid=com.google.zxing.client.android'>ZXing Barcode</a> users: disable "Retrieve more info" from the settings, otherwise your recipient will <strong>NOT</strong> be able to view the post.</p>
-    <a id="show_hide" href="#" onclick="toggle('qrcode');">Show QR Code</a>
-    <div id="qrcode">&nbsp;</div>
-    <script type="text/javascript">
-        new QRCode(document.getElementById("qrcode"), { text: "{{ url_for('fetch_url', random_url=random, _external=True) }}", correctLevel: QRCode.CorrectLevel.L });
-        function toggle(id) {
-            var state = document.getElementById(id).style.height;
-            var text = document.getElementById("show_hide");
-            if (state == '300px') {
-                document.getElementById(id).style.height = '0px';
-                document.getElementById(id).style.opacity = '0';
-                text.innerHTML = "Show QR Code";
-            } else {
-                document.getElementById(id).style.height = '300px';
-                document.getElementById(id).style.opacity = '1';
-                text.innerHTML = "Hide QR Code";
-            }
+<h1>Your Secret Note Details</h1>
+<p>If you submitted this note in error, you can <a
+        href="{{ url_for('fetch_url', random_url=random, _external=True) }}">destroy the note here</a></li>.</p>
+<p><b>Your private url:</b>
+    <span class="mono">{{ url_for('fetch_url', random_url=random, _external=True) }}</span>
+</p>
+<p><b>Your private ID:</b>
+    <span class="mono">{{ random }}</span>
+    <span class="tooltip">
+        <span class="trigger">?</span>
+        <span class="popup">For plausible deniability, provide just the private ID to the note, rather than the full
+            URL.</span>
+    </span>
+</p>
+{% if passphrase %}
+<p><b>Your passphrase:</b>
+    <span class="mono">{{ passphrase}}</span>
+</p>
+{% endif %}
+{% if duress %}
+<p><b>Your duress key:</b>
+    <span class="mono">{{ duress }}</span>
+    <span class="tooltip">
+        <span class="trigger">?</span>
+        <span class="popup">A key that you provide to someone that is demanding decryption of the note. Except, this key
+            will immediately destroy the note, without decrypting it.</span>
+    </span>
+</p>
+{% endif %}
+<p>Alternatively, you can scan this QR code, and "share" it using your mobile device via text message, email, etc.
+    <strong>NOTE:</strong> <a href='https://f-droid.org/repository/browse/?fdid=com.google.zxing.client.android'>ZXing
+        Barcode</a> users: disable "Retrieve more info" from the settings, otherwise your recipient will
+    <strong>NOT</strong> be able to view the post.
+</p>
+<a id="show_hide" href="#" onclick="toggle('qrcode');">Show QR Code</a>
+<div id="qrcode">&nbsp;</div>
+<script type="text/javascript">
+    new QRCode(document.getElementById("qrcode"), { text: "{{ url_for('fetch_url', random_url=random, _external=True) }}", correctLevel: QRCode.CorrectLevel.L });
+    function toggle(id) {
+        var state = document.getElementById(id).style.height;
+        var text = document.getElementById("show_hide");
+        if (state == '300px') {
+            document.getElementById(id).style.height = '0px';
+            document.getElementById(id).style.opacity = '0';
+            text.innerHTML = "Show QR Code";
+        } else {
+            document.getElementById(id).style.height = '300px';
+            document.getElementById(id).style.opacity = '1';
+            text.innerHTML = "Hide QR Code";
         }
-    </script>
+    }
+</script>
 {% endblock %}

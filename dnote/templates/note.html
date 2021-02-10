@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Private Note{% endblock %}
 {% block head %}
-    <meta http-equiv="Refresh" content="180"; url="{{ url_for('index',
+<meta http-equiv="Refresh" content="180" ; url="{{ url_for('index',
     _external=True) }}" />
-    <script type="text/javascript">
-        setTimeout(function(){window.location.href="{{ url_for('index',
-        _external=True) }}"}, 180000);
-    </script>
+<script type="text/javascript">
+    setTimeout(function () { window.location.href = "{{ url_for('index', _external=True) }}" }, 180000);
+</script>
 {% endblock %}
 {% block content %}
-    <h1>Reading Secret Note</h1>
-    <p>Here is your private note, decrypted only for your browser. This note has been securely destroyed on the server. In 3 minutes, you will be redirected back to the home page.</p>
-    <textarea style="width:100%; height:250px">{{ text }}</textarea>
+<h1>Reading Secret Note</h1>
+<p>Here is your private note, decrypted only for your browser. This note has been securely destroyed on the server. In 3
+    minutes, you will be redirected back to the home page.</p>
+<textarea style="width:100%; height:250px">{{ text }}</textarea>
 {% endblock %}
