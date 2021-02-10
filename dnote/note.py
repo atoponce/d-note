@@ -1,4 +1,4 @@
-"""encrypts and decrypts notes."""
+"""Encrypts and decrypts notes."""
 import base64
 import codecs
 import configparser
@@ -58,6 +58,8 @@ data_dir = cfgs.get('dnote').get('data_dir')
 
 
 def cleave_hash(hash: str, remove=True):
+    """ Generic function that can either strip off trailing equals signs from a base64 encoded
+    byte string or figures out how to put them back"""
     if remove:
         return hash.replace('=', '')
     else:
@@ -70,23 +72,25 @@ def cleave_hash(hash: str, remove=True):
                 return tmp_hash
             except Exception as e:
                 continue
+        raise ValueError("The partial hash you passed in is not compatible with this function")
 
 
 class Note(object):
     """Note Model"""
     url = None          # URI of Note
-    nonce = None        # ID utils.decoded from url
+    nonce = None        # ID decoded from url
     fname = None        # File name
-    f_key = None        # ID utils.decoded from fname
-    aes_key = None      # AES utils.encryption key
+    f_key = None        # ID decoded from fname
+    aes_key = None      # AES encryption key
     mac_key = None      # HMAC verification key
     passphrase = None   # User provided passphrase
     dkey = None         # Duress passphrase
     plaintext = None    # Plain text note
-    ciphertext = None   # utils.encrypted text
+    ciphertext = None   # encrypted text
     byte_size = None    # Used to calculate the size of the URL and duress key
 
     def __init__(self, url=None):
+        """initialise for Note object, url is optional"""
         # load the byte_size from the config
         self.byte_size = max(int(cfgs['dnote'].get('byte_size', 16)), 4)
         if url is None:
@@ -137,14 +141,17 @@ class Note(object):
         self.duress_key()
 
     def fname_and_fkey(self):
+        """Set filename and f_key"""
         self.f_key = PBKDF2(self.nonce, utils.dec(dconfig.nonce_salt), 16)
         self.fname = cleave_hash(utils.dec(base64.urlsafe_b64encode(self.f_key), "utf-8"))
 
     def aes_and_mac(self, obj):
+        """Set AES and HMAC keys"""
         self.aes_key = PBKDF2(obj, utils.dec(dconfig.aes_salt), 32)
         self.mac_key = PBKDF2(obj, utils.dec(dconfig.mac_salt), 64)
 
     def set_passphrase(self, passphrase):
+        """Set a user defined passphrase to override the AES and HMAC keys"""
         self.passphrase = passphrase
         self.aes_and_mac(passphrase)
 
