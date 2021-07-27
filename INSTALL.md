@@ -161,7 +161,7 @@ in the uwsgi.ini file instead of module, like this:
 
 
 
-These are some notes I made for CentOS 7.9, it's still needs cleaning, I just needed a place to dump it for now
+These are some notes I made for CentOS 7.9, it still needs cleaning, I just needed a place to dump it for now
 ---------------------------------------------------------------------------------------------------------------
 
 ```sh
