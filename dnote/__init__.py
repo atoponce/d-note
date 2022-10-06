@@ -1,11 +1,14 @@
+#!/usr/bin/env python3
+
 """This module sets up the paths for the Flask web application."""
 import os
-import utils
+from . import utils
 from flask import Flask, render_template, request, redirect, url_for
-from note import Note
+from .note import Note
 
 DNOTE = Flask(__name__)
 HERE = DNOTE.root_path
+
 
 @DNOTE.route('/', methods=['GET'])
 def index():
@@ -14,20 +17,24 @@ def index():
     note = Note()
     return render_template('index.html', random=note.url, error=error)
 
+
 @DNOTE.route('/security/', methods=['GET'])
 def security():
     """Return the index.html for the security page."""
     return render_template('security.html')
+
 
 @DNOTE.route('/faq/', methods=['GET'])
 def faq():
     """Return the index.html for the faq page."""
     return render_template('faq.html')
 
+
 @DNOTE.route('/about/', methods=['GET'])
 def about():
     """Return the index.html for the about page."""
     return render_template('about.html')
+
 
 @DNOTE.route('/post', methods=['POST'])
 def show_post():
@@ -51,6 +58,7 @@ def show_post():
     else:
         note.encrypt()
         return render_template('post.html', random=note.url)
+
 
 @DNOTE.route('/<random_url>', methods=['POST', 'GET'])
 def fetch_url(random_url):
@@ -76,6 +84,7 @@ def fetch_url(random_url):
         return render_template('note.html', text=note.plaintext)
     else:
         return render_template('keyerror.html', random=note.url)
+
 
 if __name__ == '__main__':
     DNOTE.debug = True

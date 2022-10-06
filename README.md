@@ -22,7 +22,8 @@ unless otherwise stated. See [the license](LICENSE.md) for the complete license.
 Demo
 ----
 
-If you would like to test drive d-note, I have it running at https://ae7.st/d/.
+If you would like to test drive d-note, the original author (Aaron Toponce) has
+an older version running at https://ae7.st/d/.
 Currently, it is hosted using a self-signed certificate. As such, the
 fingerprints of the certificate are:
 
